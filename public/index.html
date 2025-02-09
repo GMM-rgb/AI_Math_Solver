@@ -281,6 +281,44 @@
             margin-top: 20px;
             text-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
         }
+
+        /* Add to existing styles */
+        .thinking-container {
+            padding: 10px 15px;
+            background: #e3f2fd;
+            border-radius: 15px;
+            margin: 10px 0;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        .thinking-dots {
+            display: inline-block;
+        }
+        
+        .thinking-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #2196F3;
+            margin: 0 2px;
+        }
+        
+        .thinking-dots span:nth-child(1) { animation: bounce 1.4s infinite; }
+        .thinking-dots span:nth-child(2) { animation: bounce 1.4s infinite 0.2s; }
+        .thinking-dots span:nth-child(3) { animation: bounce 1.4s infinite 0.4s; }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script src="js/tf_model.js"></script>
@@ -538,8 +576,24 @@
             
             if (!message) return;
             
+            // Add user message
             addMessage(message, true);
             input.value = '';
+
+            // Add thinking indicator
+            const messages = document.getElementById('chatMessages');
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'message ai-message';
+            thinkingDiv.innerHTML = `
+                <div class="thinking-container">
+                    <span style="color: #1976D2; font-weight: 500;">AI is thinking</span>
+                    <div class="thinking-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
+            messages.appendChild(thinkingDiv);
+            messages.scrollTop = messages.scrollHeight;
 
             try {
                 lockScroll(true);
@@ -548,6 +602,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
                 });
+
+                // Remove thinking indicator
+                messages.removeChild(thinkingDiv);
 
                 const result = await response.text();
                 try {
@@ -558,7 +615,7 @@
                             text: JSON.stringify(jsonResult),
                             isUser: false,
                             timestamp: new Date().toISOString(),
-                            type: 'math_solution'  // Mark this as a math solution
+                            type: 'math_solution'
                         });
                         saveConversations();
                     }
@@ -567,6 +624,7 @@
                 }
                 lockScroll(false);
             } catch (error) {
+                messages.removeChild(thinkingDiv);
                 lockScroll(false);
                 addMessage("I couldn't process that. Please try again.", false);
             }

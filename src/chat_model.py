@@ -7,6 +7,8 @@ from pathlib import Path
 from fractions import Fraction
 from sympy.solvers import solve
 from sympy.parsing.sympy_parser import parse_expr
+from utils.wiki_helper import WikiHelper
+from learning.self_learner import SelfLearner
 
 class SimpleMathModel:
     def __init__(self):
@@ -154,6 +156,8 @@ class ChatBot:
             'magic': ['✨', '💫', '🌟']
         }
         self.math_model = SimpleMathModel()  # Replace TensorFlow model with simple math
+        self.wiki_helper = WikiHelper()
+        self.self_learner = SelfLearner()
 
     def _identify_problem_type(self, problem):
         """Identify the type of math problem"""
@@ -378,14 +382,43 @@ class ChatBot:
         return self.add_personality(base_response, 'think')
 
     def get_response(self, message):
+        response = None
+        
+        # Check for definition requests
+        if 'what is' in message.lower() or 'define' in message.lower():
+            term = message.lower().replace('what is', '').replace('define', '').strip()
+            definition = self.self_learner.get_definition(term)
+            
+            if not definition:
+                # Try Wikipedia
+                definition = self.wiki_helper.get_definition(term)
+                if definition:
+                    self.self_learner.add_definition(term, definition)
+            
+            if definition:
+                return self.add_personality(f"Here's what I found: {definition}", 'smart', ['help'])
+
+        # Regular pattern matching
         for pattern, handler in self.math_patterns.items():
             if re.search(pattern, message, re.IGNORECASE):
-                return handler(message)
-        # If no math pattern matched, try to generate a smart fallback.
-        fallback = self.randomize_response(message)
-        if fallback:
-            return fallback
-        return "I'm not sure I understand. Could you please rephrase?"
+                response = handler(message)
+                break
+                
+        if not response:
+            # Check similar conversations
+            similar = self.self_learner.find_similar_conversations(message)
+            if similar:
+                response = self.add_personality(
+                    f"Based on similar conversations, I think: {similar[0]['ai_response']}", 
+                    'think', 
+                    ['smart']
+                )
+            else:
+                response = "I'm not sure I understand. Could you please rephrase?"
+
+        # Learn from this conversation
+        self.self_learner.learn_from_conversation(message, response)
+        return response
 
 if __name__ == "__main__":
     import sys

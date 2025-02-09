@@ -350,7 +350,10 @@
             "responses": [
                 "Would you like to try solving a math problem now?",
                 "I'm ready to help with any calculations you need.",
-                "Feel free to type in a math problem for me to solve!"
+                "Feel free to type in a math problem for me to solve!",
+                "Let's tackle some math together!",
+                "I'm here to assist you with math problems.",
+                "What math problem would you like to solve?"
             ],
             "variations": [
                 "ok", "okay", "alright", "sure", "yes",
@@ -362,7 +365,11 @@
             "responses": [
                 "I'm here to help you don't worry! What math problem would you like to solve?",
                 "I'll guide you through the math problem step by step. What's the question?",
-                "Don't hesitate to ask! I'm here to assist you with math problems or explanations if you need."
+                "Don't hesitate to ask! I'm here to assist you with math problems or explanations if you need.",
+                "I'm ready to help you with any math problem you have.",
+                "What math problem would you like to solve?",
+                "I'm here to help you with math problems or explanations if you need.",
+                "Give a go at the math problem you want to solve, we can do it together!"
             ],
             "variations": [
                 "need help", "can you help", "help me", "i need help",

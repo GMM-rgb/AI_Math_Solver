@@ -386,49 +386,50 @@ class ChatBot:
     </div>
 </div>"""
 
-                    # Combine with animations and thinking container
+                    # Update the styles section with better animations
                     return f"""
 <style>
-    @keyframes typeIn {{
-        from {{ width: 0; }}
-        to {{ width: 100%; }}
+    @keyframes slideInFade {{
+        from {{ 
+            transform: translateY(-10px);
+            opacity: 0;
+        }}
+        to {{ 
+            transform: translateY(0);
+            opacity: 1;
+        }}
     }}
     @keyframes fadeIn {{
-        from {{ opacity: 0; }}
+        from {{ opacity: 0.4; }}
         to {{ opacity: 1; }}
     }}
-    @keyframes slideIn {{
-        from {{ width: 0; }}
-        to {{ width: 100%; }}
-    }}
-    @keyframes bounce {{
-        0%, 100% {{ transform: translateY(0); }}
-        50% {{ transform: translateY(-6px); }}
-    }}
-    @keyframes pulse {{
-        0% {{ transform: scale(1); }}
-        50% {{ transform: scale(1.05); }}
-        100% {{ transform: scale(1); }}
+    @keyframes highlightText {{
+        0% {{ background-color: rgba(33, 150, 243, 0.1); }}
+        50% {{ background-color: rgba(33, 150, 243, 0.05); }}
+        100% {{ background-color: transparent; }}
     }}
     .math-text {{
-        overflow: hidden;
-        white-space: nowrap;
-        animation: typeIn 1s steps(40, end);
+        animation: slideInFade 0.5s ease-out;
+        white-space: pre-wrap;
     }}
     .divider {{
-        width: 100%;
         height: 1px;
         background: #ddd;
-        animation: slideIn 0.8s ease-out;
+        margin: 10px 0;
+        animation: slideInFade 0.3s ease-out;
     }}
     .fade-in {{
-        opacity: 0;
         animation: fadeIn 0.5s ease-out forwards;
     }}
     .step-item {{
-        animation: fadeIn 0.5s ease-out forwards;
-        animation-delay: calc(var(--index) * 0.2s);
+        animation: slideInFade 0.4s ease-out forwards;
+        animation-delay: calc(var(--index) * 0.15s);
         opacity: 0;
+        padding: 5px;
+        border-radius: 4px;
+    }}
+    .step-item:hover {{
+        background-color: rgba(33, 150, 243, 0.05);
     }}
 </style>
 {math_solution}"""
@@ -497,6 +498,7 @@ class ChatBot:
         margin: 15px 0;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         font-family: 'Arial', sans-serif;
+        animation: slideInFade 0.5s ease-out;
     }}
     .math-solution h3 {{
         color: #2196F3;
@@ -515,7 +517,12 @@ class ChatBot:
         font-size: 1.1em;
         margin: 5px 0;
         color: #333;
-        animation: slideIn 0.5s ease-out;
+        animation: slideInFade 0.5s ease-out;
+        padding: 5px;
+        border-radius: 4px;
+    }}
+    .equation:hover {{
+        background-color: rgba(33, 150, 243, 0.05);
     }}
     .solution {{
         margin-top: 15px;
@@ -530,17 +537,17 @@ class ChatBot:
     }}
     .step {{
         margin: 8px 0;
-        padding: 5px;
+        padding: 8px;
         color: #555;
         font-size: 1em;
-        animation: fadeIn 0.5s ease-out forwards;
-        animation-delay: calc(var(--index) * 0.2s);
+        animation: slideInFade 0.4s ease-out forwards;
+        animation-delay: calc(var(--index) * 0.15s);
         opacity: 0;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
     }}
-    .final-result {{
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #e9ecef;
+    .step:hover {{
+        background-color: rgba(33, 150, 243, 0.05);
     }}
     .result {{
         font-size: 1.2em;
@@ -549,15 +556,26 @@ class ChatBot:
         padding: 10px;
         background-color: white;
         border-radius: 4px;
-        animation: fadeIn 0.8s ease-out;
+        animation: highlightAnswer 1s ease-out;
+    }}
+    @keyframes slideInFade {{
+        from {{ 
+            transform: translateY(-10px);
+            opacity: 0;
+        }}
+        to {{ 
+            transform: translateY(0);
+            opacity: 1;
+        }}
     }}
     @keyframes fadeIn {{
-        from {{ opacity: 0; }}
+        from {{ opacity: 0.4; }}
         to {{ opacity: 1; }}
     }}
-    @keyframes slideIn {{
-        from {{ transform: translateX(-20px); opacity: 0; }}
-        to {{ transform: translateX(0); opacity: 1; }}
+    @keyframes highlightAnswer {{
+        0% {{ background-color: rgba(40, 167, 69, 0.1); }}
+        50% {{ background-color: rgba(40, 167, 69, 0.05); }}
+        100% {{ background-color: white; }}
     }}
 </style>"""
 

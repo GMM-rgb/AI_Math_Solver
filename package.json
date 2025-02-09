@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "echo \"No tests specified\" && exit 0",
+    "build": "mkdir -p dist && cp -r public/* dist/"
   },
   "dependencies": {
     "@tensorflow/tfjs": "^4.15.0",

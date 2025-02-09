@@ -1,5 +1,16 @@
 {
-    "learned_concepts": {},
+    "learned_concepts": {
+        "equation": {
+            "occurrences": 1,
+            "context_examples": [
+                {
+                    "user_msg": "7x + 3 = 5",
+                    "ai_response": "\n<style>\n    @keyframes typeIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes fadeIn {\n        from { opacity: 0; }\n        to { opacity: 1; }\n    }\n    @keyframes slideIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes bounce {\n        0%, 100% { transform: translateY(0); }\n        50% { transform: translateY(-6px); }\n    }\n    @keyframes pulse {\n        0% { transform: scale(1); }\n        50% { transform: scale(1.05); }\n        100% { transform: scale(1); }\n    }\n    .math-text {\n        overflow: hidden;\n        white-space: nowrap;\n        animation: typeIn 1s steps(40, end);\n    }\n    .divider {\n        width: 100%;\n        height: 1px;\n        background: #ddd;\n        animation: slideIn 0.8s ease-out;\n    }\n    .fade-in {\n        opacity: 0;\n        animation: fadeIn 0.5s ease-out forwards;\n    }\n    .step-item {\n        animation: fadeIn 0.5s ease-out forwards;\n        animation-delay: calc(var(--index) * 0.2s);\n        opacity: 0;\n    }\n</style>\n\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">Problem: 7x + 3 = 5</div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Answer: x = 2/7\n    </div>\n    \n    <div class=\"fade-in\" style=\"margin-top: 10px; color: #666;\">\n        <div>Steps:</div>\n        <ul style=\"margin: 5px 0; padding-left: 20px;\">\n            <li class=\"step-item\" style=\"--index: 1\">1. Original equation: 7x + 3 = 5</li><li class=\"step-item\" style=\"--index: 2\">2. Rearranged to: 7*x - 2 = 0</li><li class=\"step-item\" style=\"--index: 3\">3. Solved for x: x = 2/7</li>\n        </ul>\n    </div>\n</div>",
+                    "timestamp": "2025-02-08T19:48:07.966631"
+                }
+            ]
+        }
+    },
     "definitions": {},
     "patterns": {},
     "conversation_history": [
@@ -72,12 +83,22 @@
             "user_msg": "Thank you",
             "ai_response": "I'm not sure I understand. Could you please rephrase?",
             "timestamp": "2025-02-08T19:40:22.077504"
+        },
+        {
+            "user_msg": "Hey",
+            "ai_response": "Oh! \ud83d\ude04 \u270f\ufe0f Good evening! Time for some math fun! \u23f0",
+            "timestamp": "2025-02-08T19:44:42.312720"
+        },
+        {
+            "user_msg": "7x + 3 = 5",
+            "ai_response": "\n<style>\n    @keyframes typeIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes fadeIn {\n        from { opacity: 0; }\n        to { opacity: 1; }\n    }\n    @keyframes slideIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes bounce {\n        0%, 100% { transform: translateY(0); }\n        50% { transform: translateY(-6px); }\n    }\n    @keyframes pulse {\n        0% { transform: scale(1); }\n        50% { transform: scale(1.05); }\n        100% { transform: scale(1); }\n    }\n    .math-text {\n        overflow: hidden;\n        white-space: nowrap;\n        animation: typeIn 1s steps(40, end);\n    }\n    .divider {\n        width: 100%;\n        height: 1px;\n        background: #ddd;\n        animation: slideIn 0.8s ease-out;\n    }\n    .fade-in {\n        opacity: 0;\n        animation: fadeIn 0.5s ease-out forwards;\n    }\n    .step-item {\n        animation: fadeIn 0.5s ease-out forwards;\n        animation-delay: calc(var(--index) * 0.2s);\n        opacity: 0;\n    }\n</style>\n\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">Problem: 7x + 3 = 5</div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Answer: x = 2/7\n    </div>\n    \n    <div class=\"fade-in\" style=\"margin-top: 10px; color: #666;\">\n        <div>Steps:</div>\n        <ul style=\"margin: 5px 0; padding-left: 20px;\">\n            <li class=\"step-item\" style=\"--index: 1\">1. Original equation: 7x + 3 = 5</li><li class=\"step-item\" style=\"--index: 2\">2. Rearranged to: 7*x - 2 = 0</li><li class=\"step-item\" style=\"--index: 3\">3. Solved for x: x = 2/7</li>\n        </ul>\n    </div>\n</div>",
+            "timestamp": "2025-02-08T19:48:07.966783"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-08T19:40:22.077650",
+        "last_updated": "2025-02-08T19:48:07.966785",
         "version": "1.0",
-        "total_conversations": 14,
+        "total_conversations": 16,
         "learning_sessions": 0
     }
 }

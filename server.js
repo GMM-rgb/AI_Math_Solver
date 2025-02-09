@@ -7,7 +7,7 @@ const wikiService = require('./src/services/wikiService');
 const chatService = require('./src/services/chatService');
 const app = express();
 const port = process.env.PORT || 3001;
-
+    
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));

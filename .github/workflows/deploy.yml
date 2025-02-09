@@ -17,7 +17,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -25,9 +24,21 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
 
+      - name: Install and generate lock file
+        run: |
+          npm install
+          npm cache clean --force
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install Dependencies
         run: |
-          npm ci
           pip install -r requirements.txt
 
       - name: Build static files

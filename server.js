@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { spawn } = require('child_process');
 const wikiService = require('./src/services/wikiService');
+const chatService = require('./src/services/chatService');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -29,37 +30,21 @@ app.post('/wiki/define', async (req, res) => {
 app.post('/chat', async (req, res) => {
     const message = req.body.message;
     
-    // Check if it's a definition request
-    if (message.toLowerCase().includes('what is') || message.toLowerCase().includes('define')) {
-        const term = message.toLowerCase()
-            .replace('what is', '')
-            .replace('define', '')
-            .trim();
-            
-        try {
-            const definition = await wikiService.getDefinition(term);
-            if (definition) {
-                return res.json({
-                    format: 'json',
-                    type: 'definition',
-                    term,
-                    definition,
-                    confidence: 90
-                });
-            }
-        } catch (error) {
-            console.error('Wiki error:', error);
-        }
-    }
-    
-    // Spawn Python process with proper environment
     try {
+        // Process message through chat service first
+        const processedMessage = await chatService.processMessage(message);
+        
+        if (processedMessage.type === 'chat') {
+            return res.send(processedMessage.response);
+        }
+
+        // Continue with Python processing for math
         const pythonPath = process.platform === 'win32' ? 'python' : 'python3';
         const projectRoot = __dirname;
         
         const pythonProcess = spawn(pythonPath, [
             path.join(projectRoot, 'src', 'chat_model.py'),
-            message
+            processedMessage.response
         ], {
             env: {
                 ...process.env,

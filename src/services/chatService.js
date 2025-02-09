@@ -29,30 +29,17 @@ class ChatService {
             await this.initialize();
         }
 
-        // First check for greetings
         const lowerMessage = message.toLowerCase().trim();
-        if (this.isGreeting(lowerMessage)) {
-            const hour = new Date().getHours();
-            let greeting;
-            if (hour < 12) {
-                greeting = "Good morning! Ready for some math? 🌅";
-            } else if (hour < 17) {
-                greeting = "Good afternoon! Let's solve some problems! 🌞";
-            } else {
-                greeting = "Good evening! Time for some math fun! 🌙";
-            }
-            return {
-                response: greeting,
-                confidence: 100,
-                type: 'chat'
-            };
-        }
 
-        // First check for exact matches in conversations
+        // Check all conversations for matches including variations
         for (const conv of this.trainingData.conversations) {
             if (conv.variations.includes(lowerMessage)) {
+                const response = this.getRandomResponse(conv.responses);
+                const timeEmoji = this.getTimeEmoji();
+                const personalityEmojis = this.getPersonalityEmojis();
+                
                 return {
-                    response: this.getRandomResponse(conv.responses),
+                    response: `${response} ${personalityEmojis} ${timeEmoji}`,
                     confidence: 100,
                     type: 'chat'
                 };
@@ -87,6 +74,16 @@ class ChatService {
         };
     }
 
+    getTimeEmoji() {
+        const hour = new Date().getHours();
+        return hour < 12 ? "🌅" : (hour < 17 ? "☀️" : "🌙");
+    }
+
+    getPersonalityEmojis() {
+        const mood = this.trainingData.personalities.friendly;
+        return mood.suffixes[Math.floor(Math.random() * mood.suffixes.length)];
+    }
+
     isGreeting(message) {
         const greetings = [
             'hi', 'hello', 'hey', 'good morning', 'good afternoon', 
@@ -102,7 +99,15 @@ class ChatService {
             return "I'm not sure how to respond to that.";
         }
         const response = responses[Math.floor(Math.random() * responses.length)];
-        return response || "I'm not sure how to respond to that.";
+        
+        // Add random prefix from personality if available
+        if (this.trainingData.personalities?.friendly?.prefixes) {
+            const prefixes = this.trainingData.personalities.friendly.prefixes;
+            const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            return `${randomPrefix} ${response}`;
+        }
+        
+        return response;
     }
 }
 

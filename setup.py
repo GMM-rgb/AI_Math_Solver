@@ -7,8 +7,6 @@ setup(
     install_requires=[
         'sympy>=1.12',
         'numpy>=1.21.0',
-        'tensorflow>=2.13.0',
-        'pillow>=9.0.0',
-        'pytesseract>=0.3.8'
+        'tensorflow>=2.11.0'
     ]
 )

@@ -12,12 +12,17 @@
             "user_msg": "Hello",
             "ai_response": "Oh! \ud83d\udd22 \ud83d\ude42 Good evening! Time for some math fun! \u23f0",
             "timestamp": "2025-02-08T19:19:39.074612"
+        },
+        {
+            "user_msg": "Hello",
+            "ai_response": "Good evening! Time for some math fun! \ud83d\ude0a \ud83d\udd22 \u231a",
+            "timestamp": "2025-02-08T19:22:30.682637"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-08T19:19:39.074618",
+        "last_updated": "2025-02-08T19:22:30.682641",
         "version": "1.0",
-        "total_conversations": 2,
+        "total_conversations": 3,
         "learning_sessions": 0
     }
 }

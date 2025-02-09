@@ -1,14 +1,41 @@
-import re
-from difflib import SequenceMatcher
-from datetime import datetime
-import random
+import os
+import sys
 import json
-from pathlib import Path
-from fractions import Fraction
-from sympy.solvers import solve
-from sympy.parsing.sympy_parser import parse_expr
-from .utils.wiki_helper import WikiHelper
-from .learning.self_learner import SelfLearner
+import codecs
+
+# Set up UTF-8 encoding for output
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+if sys.stderr.encoding != 'utf-8':
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+# Add the project root to Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(project_root)
+
+try:
+    from src.utils.requirements_checker import check_requirements
+    # Run requirements check first
+    check_requirements()
+
+    # Then import the rest
+    import re
+    from difflib import SequenceMatcher
+    from datetime import datetime
+    import random
+    from pathlib import Path
+    from fractions import Fraction
+    from sympy.solvers import solve
+    from sympy.parsing.sympy_parser import parse_expr
+    from src.utils.wiki_helper import WikiHelper
+    from src.learning.self_learner import SelfLearner
+except ImportError as e:
+    print(json.dumps({
+        "error": f"Import error: {str(e)}",
+        "format": "json",
+        "confidence": 0
+    }))
+    sys.exit(1)
 
 class SimpleMathModel:
     def __init__(self):
@@ -248,7 +275,8 @@ class ChatBot:
                 f"{emoji_prefix}... {message}{emoji_suffix}",
                 f"Oh! {emoji_prefix} {message}{emoji_suffix}",
             ]
-            return random.choice(phrases)
+            response = random.choice(phrases)
+            return response.encode('utf-8').decode('utf-8')
         except UnicodeEncodeError:
             return message
 
@@ -421,45 +449,39 @@ class ChatBot:
         return response
 
 if __name__ == "__main__":
-    import sys
-    import io
-    import os
-
-    # Redirect debug output to stderr
-    debug_output = sys.stderr
-
-    # Force UTF-8 encoding for Windows console
-    if sys.platform.startswith('win'):
-        try:
-            import subprocess
-            subprocess.run(['chcp', '65001'], shell=True, check=True, stdout=debug_output, stderr=debug_output)
-        except:
-            pass
-    
-    # Set up UTF-8 output
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace') if hasattr(sys.stdout, 'reconfigure') else None
-
-    if len(sys.argv) < 2:
-        print("No message provided.", file=debug_output)
-        sys.exit(1)
-    
     try:
-        # Temporarily redirect stdout to capture only chat output
-        original_stdout = sys.stdout
-        chat_output = io.StringIO()
-        sys.stdout = chat_output
-
+        # Set up UTF-8 encoding
+        import locale
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        
+        if sys.stdout.encoding != 'utf-8':
+            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+            
+        if len(sys.argv) < 2:
+            print(json.dumps({
+                "error": "No message provided",
+                "format": "json",
+                "confidence": 0
+            }))
+            sys.exit(1)
+        
         chatbot = ChatBot()
         response = chatbot.get_response(sys.argv[1])
         
-        # Reset stdout
-        sys.stdout = original_stdout
-
-        # Print only the chat response
-        if response.strip().startswith('<div'):
-            print(response)
-        else:
-            print(response.encode('utf-8', errors='replace').decode('utf-8'))
-
+        # Ensure response is properly encoded
+        if isinstance(response, str):
+            if not response.startswith('{'):
+                response = json.dumps({
+                    "text": response,
+                    "format": "json",
+                    "confidence": 100
+                }, ensure_ascii=False)
+        print(response.encode('utf-8').decode('utf-8'))
+        sys.exit(0)
     except Exception as e:
-        print(f"Error: {str(e)}", file=debug_output)
+        print(json.dumps({
+            "error": str(e),
+            "format": "json",
+            "confidence": 0
+        }, ensure_ascii=False))
+        sys.exit(1)

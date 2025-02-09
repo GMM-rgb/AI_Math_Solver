@@ -7,12 +7,17 @@
             "user_msg": "Hey",
             "ai_response": "\ud83d\udd22 \u231a Good evening! Time for some math fun! \ud83d\ude42",
             "timestamp": "2025-02-08T19:05:36.220589"
+        },
+        {
+            "user_msg": "Hello",
+            "ai_response": "Oh! \ud83d\udd22 \ud83d\ude42 Good evening! Time for some math fun! \u23f0",
+            "timestamp": "2025-02-08T19:19:39.074612"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-08T19:05:36.220589",
+        "last_updated": "2025-02-08T19:19:39.074618",
         "version": "1.0",
-        "total_conversations": 1,
+        "total_conversations": 2,
         "learning_sessions": 0
     }
 }

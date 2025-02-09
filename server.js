@@ -40,6 +40,7 @@ app.post('/chat', async (req, res) => {
             const definition = await wikiService.getDefinition(term);
             if (definition) {
                 return res.json({
+                    format: 'json',
                     type: 'definition',
                     term,
                     definition,
@@ -51,29 +52,70 @@ app.post('/chat', async (req, res) => {
         }
     }
     
-    // If not a definition request or wiki lookup failed, use Python chat
-    const pythonProcess = spawn('python', [
-        path.join(__dirname, 'src', 'chat_model.py'),
-        message
-    ]);
+    // Spawn Python process with proper environment
+    try {
+        const pythonPath = process.platform === 'win32' ? 'python' : 'python3';
+        const projectRoot = __dirname;
+        
+        const pythonProcess = spawn(pythonPath, [
+            path.join(projectRoot, 'src', 'chat_model.py'),
+            message
+        ], {
+            env: {
+                ...process.env,
+                PYTHONPATH: projectRoot,
+                PYTHONIOENCODING: 'utf-8',
+                PYTHONUTF8: '1',
+                LANG: 'en_US.UTF-8'
+            },
+            cwd: projectRoot  // Set working directory to project root
+        });
 
-    let result = '';
+        let result = '';
+        let errorOutput = '';
 
-    pythonProcess.stdout.on('data', (data) => {
-        result += data.toString();
-    });
+        pythonProcess.stdout.setEncoding('utf8');
+        pythonProcess.stderr.setEncoding('utf8');
 
-    pythonProcess.stderr.on('data', (data) => {
-        console.error(`Python Error: ${data}`);
-    });
+        pythonProcess.stdout.on('data', (data) => {
+            result += data.toString('utf8');
+        });
 
-    pythonProcess.on('close', (code) => {
-        if (code !== 0) {
-            res.status(500).send('Error processing request');
-            return;
+        pythonProcess.stderr.on('data', (data) => {
+            errorOutput += data.toString();
+            console.error(`Python Error: ${data}`);
+        });
+
+        // Use Promise to handle process completion
+        await new Promise((resolve, reject) => {
+            pythonProcess.on('close', (code) => {
+                if (code !== 0) {
+                    reject(new Error(`Python process exited with code ${code}: ${errorOutput}`));
+                } else {
+                    resolve();
+                }
+            });
+            
+            pythonProcess.on('error', (err) => {
+                reject(new Error(`Failed to start Python process: ${err.message}`));
+            });
+        });
+
+        // Try to parse result as JSON, fallback to plain text
+        try {
+            const jsonResult = JSON.parse(result);
+            res.json(jsonResult);
+        } catch {
+            res.send(result);
         }
-        res.send(result);
-    });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({
+            error: 'Error processing request',
+            details: error.message,
+            format: 'json'
+        });
+    }
 });
 
 // Start server

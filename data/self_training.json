@@ -118,12 +118,42 @@
             "user_msg": "Hello",
             "ai_response": "Good evening! Time for some math fun! \ud83d\ude42 \u270f\ufe0f \u23f0",
             "timestamp": "2025-02-08T20:37:06.079633"
+        },
+        {
+            "user_msg": "Hi",
+            "ai_response": "\ud83e\udd1d \ud83d\udcd0 Good morning! Ready for some math? \ud83d\ude04",
+            "timestamp": "2025-02-09T10:54:41.757835"
+        },
+        {
+            "user_msg": "Hey",
+            "ai_response": "Good morning! Ready for some math? \ud83e\udd1d \ud83d\udd50 \ud83d\ude42 \u270f\ufe0f",
+            "timestamp": "2025-02-09T10:55:34.369067"
+        },
+        {
+            "user_msg": "5+9",
+            "ai_response": "\n<style>\n    @keyframes typeIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes fadeIn {\n        from { opacity: 0; }\n        to { opacity: 1; }\n    }\n    @keyframes slideIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes bounce {\n        0%, 100% { transform: translateY(0); }\n        50% { transform: translateY(-6px); }\n    }\n    @keyframes pulse {\n        0% { transform: scale(1); }\n        50% { transform: scale(1.05); }\n        100% { transform: scale(1); }\n    }\n    .math-text {\n        overflow: hidden;\n        white-space: nowrap;\n        animation: typeIn 1s steps(40, end);\n    }\n    .divider {\n        width: 100%;\n        height: 1px;\n        background: #ddd;\n        animation: slideIn 0.8s ease-out;\n    }\n    .fade-in {\n        opacity: 0;\n        animation: fadeIn 0.5s ease-out forwards;\n    }\n    .step-item {\n        animation: fadeIn 0.5s ease-out forwards;\n        animation-delay: calc(var(--index) * 0.2s);\n        opacity: 0;\n    }\n</style>\n\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">Problem: 5+9</div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Answer: 14.0\n    </div>\n    <div class=\"fade-in\" style=\"color: #666; margin-top: 5px;\">Fraction: None</div>\n    <div class=\"fade-in\" style=\"margin-top: 10px; color: #666;\">\n        <div>Steps:</div>\n        <ul style=\"margin: 5px 0; padding-left: 20px;\">\n            <li class=\"step-item\" style=\"--index: 1\">1. Read Addition problem: 5+9</li><li class=\"step-item\" style=\"--index: 2\">2. Calculate result: 14.0</li>\n        </ul>\n    </div>\n</div>",
+            "timestamp": "2025-02-09T10:57:24.500991"
+        },
+        {
+            "user_msg": "Thanks",
+            "ai_response": "\ud83e\udde0 \ud83d\udcad... Based on similar conversations, I think: I'm not sure I understand. Could you please rephrase? \ud83e\udde0",
+            "timestamp": "2025-02-09T10:57:54.722522"
+        },
+        {
+            "user_msg": "Okay",
+            "ai_response": "I'm not sure I understand. Could you please rephrase?",
+            "timestamp": "2025-02-09T10:58:10.836790"
+        },
+        {
+            "user_msg": "Hello again",
+            "ai_response": "Oh! \ud83d\udd50 \ud83d\udcd0 Good morning! Ready for some math? \ud83d\ude0a",
+            "timestamp": "2025-02-09T11:01:00.961464"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-08T20:37:06.079637",
+        "last_updated": "2025-02-09T11:01:00.961468",
         "version": "1.0",
-        "total_conversations": 21,
+        "total_conversations": 27,
         "learning_sessions": 0
     }
 }

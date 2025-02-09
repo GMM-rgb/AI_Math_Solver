@@ -128,7 +128,8 @@
                                               "how's your day going on so far today?!",
                                                "how's your day been going on so far today?!",
                                                 "how's your day going on so far today?!!",
-                                                 "how's your day been going on so far today?!!"]
+                                                 "how's your day been going on so far today?!!",
+                                            "sup"]
         },
         {
             "input": "search",

@@ -517,6 +517,19 @@
                 bottom: 0;
                 overflow: hidden;
             }
+            .chat-container::-webkit-scrollbar {
+                width: 12px;
+            }
+            .chat-container::-webkit-scrollbar-track {
+                background: #004f9e;
+                border: 2px solid #ccc;
+                border-radius: 15px;
+            }
+            .chat-container::-webkit-scrollbar-thumb {
+                background: #2196F3;
+                border: 2px solid #ccc;
+                border-radius: 15px;
+            }
 
             /* Ensure buttons and inputs are easier to tap */
             button, .image-upload label {
@@ -711,7 +724,7 @@
         }
 
         .message:last-child {
-            margin-bottom: 70px !important;
+            margin-bottom: 30px !important;
         }
 
         /* Mobile specific fixes */

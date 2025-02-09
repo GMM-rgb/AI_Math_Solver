@@ -18,7 +18,7 @@ try:
     # Run requirements check first
     check_requirements()
 
-    # Then import the rest
+    # Then import the rest of the modules
     import re
     from difflib import SequenceMatcher
     from datetime import datetime

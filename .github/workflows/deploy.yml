@@ -27,6 +27,7 @@ jobs:
       - name: Install and generate lock file
         run: |
           npm install
+          npm audit fix --force
           npm cache clean --force
 
       - name: Cache dependencies

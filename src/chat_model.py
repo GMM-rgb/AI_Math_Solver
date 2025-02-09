@@ -451,36 +451,22 @@ if __name__ == "__main__":
     try:
         # Set up UTF-8 encoding
         import locale
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        locale.setlocale(locale.LC_ALL, '')
         
-        if sys.stdout.encoding != 'utf-8':
-            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-            
         if len(sys.argv) < 2:
-            print(json.dumps({
-                "error": "No message provided",
-                "format": "json",
-                "confidence": 0
-            }))
+            print("No message provided")
             sys.exit(1)
         
         chatbot = ChatBot()
         response = chatbot.get_response(sys.argv[1])
         
-        # Ensure response is properly encoded
-        if isinstance(response, str):
-            if not response.startswith('{'):
-                response = json.dumps({
-                    "text": response,
-                    "format": "json",
-                    "confidence": 100
-                }, ensure_ascii=False)
-        print(response.encode('utf-8').decode('utf-8'))
+        # For math solutions that contain HTML
+        if isinstance(response, str) and response.strip().startswith('<'):
+            print(response)  # Print HTML as-is
+        else:
+            # For regular chat messages, just print the text directly
+            print(response)
         sys.exit(0)
     except Exception as e:
-        print(json.dumps({
-            "error": str(e),
-            "format": "json",
-            "confidence": 0
-        }, ensure_ascii=False))
+        print(f"Error: {str(e)}")
         sys.exit(1)

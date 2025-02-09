@@ -88,7 +88,7 @@ def solve_algebraic(problem):
 def solve_system_of_equations(equations):
     """Solve a system of linear equations"""
     try:
-        from sympy import symbols, solve
+        from sympy import symbols, solve, simplify
         from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
         
         x, y = symbols('x y')
@@ -106,9 +106,19 @@ def solve_system_of_equations(equations):
         # Solve the system
         solution = solve(system, [x, y])
         
+        # Format the solution nicely
         if isinstance(solution, dict):
-            return ", ".join(f"{var} = {val}" for var, val in solution.items())
-        return str(solution)
+            return ", ".join(f"{var} = {simplify(val)}" for var, val in solution.items())
+        elif isinstance(solution, list):
+            formatted = []
+            for sol in solution:
+                if isinstance(sol, tuple):
+                    x_val = simplify(sol[0])
+                    y_val = simplify(sol[1])
+                    formatted.append(f"x = {x_val}, y = {y_val}")
+            return " or ".join(formatted)
+        
+        return str(simplify(solution))
         
     except Exception as e:
         return f"Error solving system: {str(e)}"

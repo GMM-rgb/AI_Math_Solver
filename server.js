@@ -117,10 +117,12 @@ app.post('/wiki/define', async (req, res) => {
 // Chat endpoint that communicates with Python
 app.post('/chat', async (req, res) => {
     const message = req.body.message;
+    console.log('Received message:', message);  // Server-side logging
     
     try {
         // Process message through chat service first
         const processedMessage = await chatService.processMessage(message);
+        console.log('Processed message:', processedMessage);  // Server-side logging
         
         if (processedMessage.type === 'chat') {
             return res.send(processedMessage.response);
@@ -145,28 +147,30 @@ app.post('/chat', async (req, res) => {
         let result = '';
         let errorOutput = '';
 
+        pythonProcess.stdout.setEncoding('utf8');
+        pythonProcess.stderr.setEncoding('utf8');
+
         pythonProcess.stdout.on('data', (data) => {
             result += data.toString();
+            console.log('Python output:', data.toString());  // Server-side logging
         });
 
         pythonProcess.stderr.on('data', (data) => {
             errorOutput += data.toString();
-            console.error(`Python Error: ${data}`);
+            console.error('Python error:', data.toString());  // Server-side logging
         });
 
         // Use Promise to handle process completion
         await new Promise((resolve, reject) => {
             pythonProcess.on('close', (code) => {
                 if (code !== 0) {
-                    console.error('Python Error Output:', errorOutput); // Add detailed error logging
-                    reject(new Error(`Python process exited with code ${code}\nError: ${errorOutput}`));
+                    reject(new Error(`Python process exited with code ${code}: ${errorOutput}`));
                 } else {
                     resolve();
                 }
             });
             
             pythonProcess.on('error', (err) => {
-                console.error('Python Process Error:', err); // Add detailed error logging
                 reject(new Error(`Failed to start Python process: ${err.message}`));
             });
         });
@@ -182,8 +186,8 @@ app.post('/chat', async (req, res) => {
             res.send(result);
         }
     } catch (error) {
-        console.error('Server error details:', error); // Add detailed error logging
-        res.status(500).send(`Error processing request: ${error.message}`);
+        console.error('Server error:', error);  // Server-side logging
+        res.status(500).send('Error processing request');
     }
 });
 

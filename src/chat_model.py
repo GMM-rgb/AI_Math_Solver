@@ -110,20 +110,16 @@ class SimpleMathModel:
     def solve_system_of_equations(self, equations):
         """Solve a system of linear equations"""
         try:
-            # Parse equations using sympy
-            from sympy import solve
+            from sympy import solve, simplify
             from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
             transformations = standard_transformations + (implicit_multiplication_application,)
             
             parsed_eqs = []
             for eq in equations:
-                # Split into LHS and RHS
                 lhs, rhs = [side.strip() for side in eq.split('=')]
-                # Convert to standard form (all terms on LHS)
                 eq_standardized = parse_expr(lhs, transformations=transformations) - parse_expr(rhs, transformations=transformations)
                 parsed_eqs.append(eq_standardized)
             
-            # Solve the system
             solution = solve(parsed_eqs, [self.x, self.y])
             
             if not solution:
@@ -131,9 +127,24 @@ class SimpleMathModel:
             
             # Format the solution
             if isinstance(solution, dict):
-                return ", ".join([f"{var} = {val}" for var, val in solution.items()])
+                formatted = []
+                for var, val in solution.items():
+                    # Simplify the expression before converting to string
+                    simple_val = simplify(val)
+                    formatted.append(f"{var} = {simple_val}")
+                return ", ".join(formatted)
+            elif isinstance(solution, list):
+                # Handle multiple solutions
+                formatted_solutions = []
+                for sol in solution:
+                    if isinstance(sol, tuple):
+                        # Format each x,y pair
+                        x_val = simplify(sol[0])
+                        y_val = simplify(sol[1])
+                        formatted_solutions.append(f"x = {x_val}, y = {y_val}")
+                return " or ".join(formatted_solutions)
             
-            return str(solution)
+            return str(simplify(solution))
             
         except Exception as e:
             return f"Error solving system: {str(e)}"
@@ -273,7 +284,6 @@ class ChatBot:
                         equations.append(match.group(1).strip())
             
             if len(equations) > 1:
-                print(f"Debug: Found system of equations: {equations}")  # Debug line
                 return '\n'.join(equations)
         
         # Continue with existing single equation/expression extraction
@@ -354,14 +364,12 @@ class ChatBot:
 
     def handle_math(self, message):
         math_problem = self.extract_math_problem(message)
-        print(f"Debug: Extracted math problem: {math_problem}")  # Debug line
         
         if math_problem:
             try:
                 # Improved system of equations handling
                 if ',' in message or '\n' in math_problem:
                     equations = [eq.strip() for eq in math_problem.split('\n') if eq.strip()]
-                    print(f"Debug: Processing equations: {equations}")  # Debug line
                     if len(equations) > 1:
                         result = self.math_model.solve_system_of_equations(equations)
                         return self._format_system_solution(equations, result)
@@ -389,44 +397,35 @@ class ChatBot:
                     # Update the styles section with better animations
                     return f"""
 <style>
-    @keyframes slideInFade {{
-        from {{ 
-            transform: translateY(-10px);
-            opacity: 0;
-        }}
-        to {{ 
-            transform: translateY(0);
-            opacity: 1;
-        }}
+    @keyframes revealText {{
+        from {{ color: rgba(51, 51, 51, 0.5); }}
+        to {{ color: rgba(51, 51, 51, 1); }}
     }}
-    @keyframes fadeIn {{
-        from {{ opacity: 0.4; }}
-        to {{ opacity: 1; }}
-    }}
-    @keyframes highlightText {{
-        0% {{ background-color: rgba(33, 150, 243, 0.1); }}
-        50% {{ background-color: rgba(33, 150, 243, 0.05); }}
-        100% {{ background-color: transparent; }}
+    @keyframes smoothFade {{
+        from {{ opacity: 0.7; transform: translateY(-5px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
     }}
     .math-text {{
-        animation: slideInFade 0.5s ease-out;
+        color: #333;
+        animation: revealText 0.5s ease-out;
         white-space: pre-wrap;
     }}
     .divider {{
         height: 1px;
         background: #ddd;
         margin: 10px 0;
-        animation: slideInFade 0.3s ease-out;
     }}
     .fade-in {{
-        animation: fadeIn 0.5s ease-out forwards;
+        opacity: 1;
+        animation: smoothFade 0.5s ease-out;
     }}
     .step-item {{
-        animation: slideInFade 0.4s ease-out forwards;
-        animation-delay: calc(var(--index) * 0.15s);
-        opacity: 0;
+        opacity: 1;
+        animation: smoothFade 0.4s ease-out;
+        animation-delay: calc(var(--index) * 0.1s);
         padding: 5px;
         border-radius: 4px;
+        color: #555;
     }}
     .step-item:hover {{
         background-color: rgba(33, 150, 243, 0.05);
@@ -498,13 +497,23 @@ class ChatBot:
         margin: 15px 0;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         font-family: 'Arial', sans-serif;
-        animation: slideInFade 0.5s ease-out;
+    }}
+    .math-solution * {{
+        opacity: 1;
+    }}
+    .equation, .step {{
+        animation: smoothFade 0.4s ease-out;
+        animation-delay: calc(var(--index) * 0.1s);
+        opacity: 1;
+    }}
+    @keyframes smoothFade {{
+        from {{ opacity: 0.7; transform: translateY(-5px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
     }}
     .math-solution h3 {{
         color: #2196F3;
         margin: 0 0 10px 0;
         font-size: 1.2em;
-        animation: fadeIn 0.5s ease-out;
     }}
     .equations {{
         margin: 10px 0;
@@ -517,7 +526,6 @@ class ChatBot:
         font-size: 1.1em;
         margin: 5px 0;
         color: #333;
-        animation: slideInFade 0.5s ease-out;
         padding: 5px;
         border-radius: 4px;
     }}
@@ -540,9 +548,6 @@ class ChatBot:
         padding: 8px;
         color: #555;
         font-size: 1em;
-        animation: slideInFade 0.4s ease-out forwards;
-        animation-delay: calc(var(--index) * 0.15s);
-        opacity: 0;
         border-radius: 4px;
         transition: background-color 0.2s ease;
     }}
@@ -556,21 +561,6 @@ class ChatBot:
         padding: 10px;
         background-color: white;
         border-radius: 4px;
-        animation: highlightAnswer 1s ease-out;
-    }}
-    @keyframes slideInFade {{
-        from {{ 
-            transform: translateY(-10px);
-            opacity: 0;
-        }}
-        to {{ 
-            transform: translateY(0);
-            opacity: 1;
-        }}
-    }}
-    @keyframes fadeIn {{
-        from {{ opacity: 0.4; }}
-        to {{ opacity: 1; }}
     }}
     @keyframes highlightAnswer {{
         0% {{ background-color: rgba(40, 167, 69, 0.1); }}

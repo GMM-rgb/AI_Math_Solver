@@ -147,7 +147,11 @@ class ChatBot:
             'think': ['🤔', '💭', '🧐'],
             'success': ['✅', '🎉', '👍'],
             'help': ['💡', '🤝', '❓'],
-            'error': ['😅', '🤨', '🤷‍♂️']
+            'error': ['😅', '🤨', '🤷‍♂️'],
+            'calculate': ['🧮', '➗', '📊'],
+            'time': ['🕐', '⏰', '⌚'],
+            'smart': ['🎓', '🧠', '📚'],
+            'magic': ['✨', '💫', '🌟']
         }
         self.math_model = SimpleMathModel()  # Replace TensorFlow model with simple math
 
@@ -201,16 +205,44 @@ class ChatBot:
             
         return None
 
-    def add_personality(self, message, mood='happy'):
-        """Add personality to responses with ASCII-safe emoticons"""
+    def get_contextual_emojis(self, message, mood='happy', context=None):
+        """Get multiple emojis based on message context"""
+        emoji_set = set()
+        
+        # Always include one mood emoji
+        emoji_set.add(random.choice(self.emojis.get(mood, ['😊'])))
+        
+        # Add context-specific emojis
+        if context:
+            if isinstance(context, list):
+                for ctx in context:
+                    if ctx in self.emojis:
+                        emoji_set.add(random.choice(self.emojis[ctx]))
+            elif context in self.emojis:
+                emoji_set.add(random.choice(self.emojis[context]))
+        
+        # Add contextual emojis based on message content
+        if 'calculate' in message.lower() or any(op in message for op in ['+', '-', '*', '/']):
+            emoji_set.add(random.choice(self.emojis['calculate']))
+        if 'help' in message.lower() or '?' in message:
+            emoji_set.add(random.choice(self.emojis['help']))
+        if 'smart' in message.lower() or 'clever' in message.lower():
+            emoji_set.add(random.choice(self.emojis['smart']))
+        
+        return list(emoji_set)
+
+    def add_personality(self, message, mood='happy', context=None):
+        """Add personality to responses with multiple emojis"""
         try:
-            emoji = random.choice(self.emojis.get(mood, [':)']))
+            emojis = self.get_contextual_emojis(message, mood, context)
+            emoji_prefix = ' '.join(emojis[:2])  # Use up to 2 emojis at start
+            emoji_suffix = ' ' + random.choice(emojis) if len(emojis) > 2 else ''
+            
             phrases = [
-                f"{emoji} {message}",
-                f"{message} {emoji}",
-                f"Hmm... {message} {emoji}",
-                f"Oh! {message} {emoji}",
-                f"I think {message} {emoji}"
+                f"{emoji_prefix} {message}{emoji_suffix}",
+                f"{message} {' '.join(emojis)}",
+                f"{emoji_prefix}... {message}{emoji_suffix}",
+                f"Oh! {emoji_prefix} {message}{emoji_suffix}",
             ]
             return random.choice(phrases)
         except UnicodeEncodeError:
@@ -277,26 +309,29 @@ class ChatBot:
 
                 return self.add_personality(
                     f"Sorry, I couldn't solve that: {result['error']}", 
-                    'error'
+                    'error',
+                    ['think', 'math']
                 )
             except Exception as e:
                 return self.add_personality(
                     f"Sorry, I had trouble with that math problem: {str(e)}", 
-                    'error'
+                    'error',
+                    ['think', 'math']
                 )
         return self.add_personality(
             "I don't see any proper math problem. Try asking something like '5 + 3' or '7 times 4'",
-            'help'
+            'help',
+            ['math', 'think']
         )
     
     def handle_greeting(self, message):
         hour = datetime.now().hour
         if hour < 12:
-            return self.add_personality("Good morning! Ready for some math?", 'happy')
+            return self.add_personality("Good morning! Ready for some math?", 'happy', ['time', 'math'])
         elif hour < 17:
-            return self.add_personality("Good afternoon! Let's solve some problems!", 'happy')
+            return self.add_personality("Good afternoon! Let's solve some problems!", 'happy', ['time', 'math'])
         else:
-            return self.add_personality("Good evening! Time for some math fun!", 'happy')
+            return self.add_personality("Good evening! Time for some math fun!", 'happy', ['time', 'math'])
 
     def handle_help(self, message):
         return ("I can solve math problems and provide step-by-step solutions. " +

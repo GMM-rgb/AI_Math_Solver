@@ -254,7 +254,25 @@ class ChatBot:
             try:
                 result = self.math_model.solve(math_problem)
                 if "error" not in result:
-                    html_output = f"""
+                    # Create the math solution HTML first
+                    math_solution = f"""
+<div style="background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;">
+    <div class="math-text" style="font-size: 18px; color: #333;">Problem: {math_problem}</div>
+    <div class="divider" style="margin: 10px 0;"></div>
+    <div class="fade-in" style="color: #2196F3; font-size: 20px;">
+        Answer: {result['answer'] if 'answer' in result else result.get('decimal')}
+    </div>
+    {f'<div class="fade-in" style="color: #666; margin-top: 5px;">Fraction: {result["fraction"]}</div>' if 'fraction' in result else ''}
+    <div class="fade-in" style="margin-top: 10px; color: #666;">
+        <div>Steps:</div>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+            {''.join(f'<li class="step-item" style="--index: {i+1}">{step}</li>' for i, step in enumerate(result["steps"]))}
+        </ul>
+    </div>
+</div>"""
+
+                    # Combine with animations and thinking container
+                    return f"""
 <style>
     @keyframes typeIn {{
         from {{ width: 0; }}
@@ -267,6 +285,15 @@ class ChatBot:
     @keyframes slideIn {{
         from {{ width: 0; }}
         to {{ width: 100%; }}
+    }}
+    @keyframes bounce {{
+        0%, 100% {{ transform: translateY(0); }}
+        50% {{ transform: translateY(-6px); }}
+    }}
+    @keyframes pulse {{
+        0% {{ transform: scale(1); }}
+        50% {{ transform: scale(1.05); }}
+        100% {{ transform: scale(1); }}
     }}
     .math-text {{
         overflow: hidden;
@@ -288,52 +315,8 @@ class ChatBot:
         animation-delay: calc(var(--index) * 0.2s);
         opacity: 0;
     }}
-    .thinking-container {{
-        padding: 10px 15px;
-        background: #e3f2fd;
-        border-radius: 15px;
-        margin: 10px 0;
-        display: inline-block;
-        animation: pulse 2s infinite;
-    }}
-    
-    .thinking-dots {{
-        display: inline-block;
-    }}
-    
-    .thinking-dots span {{
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background-color: #2196F3;
-        margin: 0 2px;
-    }}
-    
-    .thinking-dots span:nth-child(1) {{ animation: bounce 1.4s infinite; }}
-    .thinking-dots span:nth-child(2) {{ animation: bounce 1.4s infinite 0.2s; }}
-    .thinking-dots span:nth-child(3) {{ animation: bounce 1.4s infinite 0.4s; }}
-    
-    @keyframes bounce {{
-        0%, 100% {{ transform: translateY(0); }}
-        50% {{ transform: translateY(-6px); }}
-    }}
-    
-    @keyframes pulse {{
-        0% {{ transform: scale(1); }}
-        50% {{ transform: scale(1.05); }}
-        100% {{ transform: scale(1); }}
-    }}
 </style>
-<div class="thinking-container">
-    <span style="color: #1976D2; font-weight: 500;">AI is thinking</span>
-    <div class="thinking-dots">
-        <span></span><span></span><span></span>
-    </div>
-</div>
-{html_output}
-"""
-                    return html_output
+{math_solution}"""
 
                 return self.add_personality(
                     f"Sorry, I couldn't solve that: {result['error']}", 

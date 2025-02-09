@@ -656,7 +656,7 @@ if __name__ == "__main__":
         response = chatbot.get_response(sys.argv[1])
         
         # For math solutions that contain HTML
-        if isinstance(response, str) and response.strip().startsWith('<'):
+        if isinstance(response, str) and response.strip().startswith('<'):  # Fix: startswith instead of startsWith
             print(response)  # Print HTML as-is
         else:
             # For regular chat messages, just print the text directly

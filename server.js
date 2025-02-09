@@ -143,15 +143,11 @@ app.post('/chat', async (req, res) => {
         });
 
         let result = '';
-
-        pythonProcess.stdout.setEncoding('utf8');
-        pythonProcess.stderr.setEncoding('utf8');
+        let errorOutput = '';
 
         pythonProcess.stdout.on('data', (data) => {
             result += data.toString();
         });
-
-        let errorOutput = '';
 
         pythonProcess.stderr.on('data', (data) => {
             errorOutput += data.toString();
@@ -162,13 +158,15 @@ app.post('/chat', async (req, res) => {
         await new Promise((resolve, reject) => {
             pythonProcess.on('close', (code) => {
                 if (code !== 0) {
-                    reject(new Error(`Python process exited with code ${code}: ${errorOutput}`));
+                    console.error('Python Error Output:', errorOutput); // Add detailed error logging
+                    reject(new Error(`Python process exited with code ${code}\nError: ${errorOutput}`));
                 } else {
                     resolve();
                 }
             });
             
             pythonProcess.on('error', (err) => {
+                console.error('Python Process Error:', err); // Add detailed error logging
                 reject(new Error(`Failed to start Python process: ${err.message}`));
             });
         });
@@ -184,8 +182,8 @@ app.post('/chat', async (req, res) => {
             res.send(result);
         }
     } catch (error) {
-        console.error('Server error:', error);
-        res.status(500).send('Error processing request');
+        console.error('Server error details:', error); // Add detailed error logging
+        res.status(500).send(`Error processing request: ${error.message}`);
     }
 });
 

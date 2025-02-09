@@ -13,5 +13,17 @@
         "Isolate variables on one side",
         "Combine like terms first",
         "Check solution by substituting back"
+    ],
+    "notes": [
+        "Identify the equation type to select the appropriate solving method.",
+        "For linear equations, simplify both sides then isolate the variable.",
+        "For quadratic equations, check the discriminant to determine solution types, try factoring first; if that fails, apply the quadratic formula: x = (-b ± sqrt(b² - 4ac)) / (2a).",
+        "Always substitute your solution back into the original equation to verify its correctness.",
+        "For equations with multiple variables, consider substitution or elimination methods, and check for any possible restrictions on the variables.",
+        "When faced with complex expressions, break the problem into smaller steps to avoid errors.",
+        "For inequalities, remember to reverse the inequality sign when multiplying or dividing by a negative number.",
+        "Look for common factors that can be canceled or factored out to simplify the equation.",
+        "Use step-by-step algebraic manipulation to ensure that no details are lost, which is essential for automated reasoning.",
+        "In cases involving irrational numbers or radicals, simplify radicals where possible to reduce complexity."
     ]
 }

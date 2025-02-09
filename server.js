@@ -6,7 +6,7 @@ const { spawn } = require('child_process');
 const wikiService = require('./src/services/wikiService');
 const chatService = require('./src/services/chatService');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());

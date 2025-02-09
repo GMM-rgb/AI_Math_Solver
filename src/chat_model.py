@@ -234,6 +234,26 @@ class SimpleMathModel:
 
 class ChatBot:
     def __init__(self):
+        self.data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+        self.data_file = Path(self.data_dir) / 'training_data.json'
+        
+        # Load training data
+        try:
+            with open(self.data_file, 'r', encoding='utf-8') as f:
+                self.training_data = json.load(f)
+        except Exception as e:
+            print(f"Error loading training data: {e}", file=sys.stderr)
+            self.training_data = {
+                "conversations": [],
+                "personalities": {
+                    "friendly": {
+                        "prefixes": ["Hey!", "Hi!", "Hello!"],
+                        "suffixes": ["😊", "✨", "💫"]
+                    }
+                }
+            }
+
+        # Initialize other attributes
         self.math_patterns = {
             r'calculate|solve|what is|=|\+|\-|\*|\/': self.handle_math,
             r'hi|hello|hey': self.handle_greeting,
@@ -241,10 +261,6 @@ class ChatBot:
             r'bye|goodbye': self.handle_goodbye,
             r'search|find|look up|research|complex': self.handle_complex_query
         }
-        # Load training data
-        self.data_file = Path(__file__).parent.parent / 'data' / 'training_data.json'
-        self.training_data = {}
-        self.load_training_data()
         self.emojis = {
             'happy': ['😊', '😄', '🙂'],
             'math': ['🔢', '📐', '✏️'],
@@ -257,9 +273,16 @@ class ChatBot:
             'smart': ['🎓', '🧠', '📚'],
             'magic': ['✨', '💫', '🌟']
         }
-        self.math_model = SimpleMathModel()  # Replace TensorFlow model with simple math
+        self.math_model = SimpleMathModel()
         self.wiki_helper = WikiHelper()
         self.self_learner = SelfLearner()
+
+    def _load_text_patterns(self):
+        try:
+            with open(os.path.join(self.data_dir, 'text_patterns.json'), 'r') as f:
+                return json.load(f)
+        except:
+            return {}
 
     def _identify_problem_type(self, problem):
         """Identify the type of math problem"""
@@ -268,14 +291,6 @@ class ChatBot:
         if '*' in problem: return "Multiplication"
         if '/' in problem: return "Division"
         return "Unknown"
-
-    def load_training_data(self):
-        try:
-            with open(self.data_file, 'r', encoding='utf-8') as f:
-                self.training_data = json.load(f)
-        except Exception as e:
-            print("Failed to load training data:", e)
-            self.training_data = {}
 
     def extract_math_problem(self, message):
         """Extract math problem from natural language question"""
@@ -738,64 +753,32 @@ function handleFeedback(isPositive) {{
         return self.add_personality(base_response, 'think')
 
     def get_response(self, message):
-        response = None
-        
-        # Check for definition requests
-        if 'what is' in message.lower() or 'define' in message.lower():
-            term = message.lower().replace('what is', '').replace('define', '').strip()
-            definition = self.self_learner.get_definition(term)
-            
-            if not definition:
-                # Try Wikipedia
-                definition = self.wiki_helper.get_definition(term)
-                if definition:
-                    self.self_learner.add_definition(term, definition)
-            
-            if definition:
-                return self.add_personality(f"Here's what I found: {definition}", 'smart', ['help'])
+        try:
+            # Look for conversation matches first
+            if self.training_data and 'conversations' in self.training_data:
+                for conv in self.training_data['conversations']:
+                    if message.lower() in [v.lower() for v in conv.get('variations', [])]:
+                        response = random.choice(conv['responses'])
+                        prefix = random.choice(self.training_data['personalities']['friendly']['prefixes'])
+                        suffix = random.choice(self.training_data['personalities']['friendly']['suffixes'])
+                        return f"{prefix} {response} {suffix}"
 
-        # Regular pattern matching
-        for pattern, handler in self.math_patterns.items():
-            if re.search(pattern, message, re.IGNORECASE):
-                response = handler(message)
-                break
-                
-        if not response:
-            # Check similar conversations
-            similar = self.self_learner.find_similar_conversations(message)
-            if similar:
-                response = self.add_personality(
-                    f"Based on similar conversations, I think: {similar[0]['ai_response']}", 
-                    'think', 
-                    ['smart']
-                )
-            else:
-                response = "I'm not sure I understand. Could you please rephrase?"
-
-        # Learn from this conversation
-        self.self_learner.learn_from_conversation(message, response)
-        return response
+            # If no conversation match, try math problem
+            return self.handle_math(message)
+        except Exception as e:
+            print(f"Error in get_response: {e}", file=sys.stderr)
+            return f"😅 Oops! I had trouble with that. Could you try again?"
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("No message provided", file=sys.stderr)
+        sys.exit(1)
+
     try:
-        # Set up UTF-8 encoding
-        import locale
-        locale.setlocale(locale.LC_ALL, '')
-        
-        if len(sys.argv) < 2:
-            print("No message provided")
-            sys.exit(1)
-        
         chatbot = ChatBot()
         response = chatbot.get_response(sys.argv[1])
-        
-        # For math solutions that contain HTML
-        if isinstance(response, str) and response.strip().startswith('<'):  # Fix: startswith instead of startsWith
-            print(response)  # Print HTML as-is
-        else:
-            # For regular chat messages, just print the text directly
-            print(response)
+        print(response)
         sys.exit(0)
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error: {str(e)}", file=sys.stderr)
         sys.exit(1)

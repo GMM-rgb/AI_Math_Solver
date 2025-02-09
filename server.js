@@ -5,6 +5,7 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const wikiService = require('./src/services/wikiService');
 const chatService = require('./src/services/chatService');
+const textGenService = require('./src/services/textGenService');
 const app = express();
 const port = process.env.PORT || 3001;
     
@@ -134,6 +135,7 @@ app.post('/wiki/define', async (req, res) => {
 // Update chat endpoint to use Python chat model
 app.post('/chat', async (req, res) => {
     const message = req.body.message;
+    console.log('Received message:', message);
     
     try {
         const pythonProcess = spawn('python3', [
@@ -143,7 +145,8 @@ app.post('/chat', async (req, res) => {
             env: {
                 ...process.env,
                 PYTHONIOENCODING: 'utf-8',
-                PYTHONUTF8: '1'
+                PYTHONUTF8: '1',
+                PATH: process.env.PATH
             }
         });
 
@@ -152,15 +155,17 @@ app.post('/chat', async (req, res) => {
 
         pythonProcess.stdout.on('data', (data) => {
             result += data.toString();
+            console.log('Python output:', data.toString());
         });
 
         pythonProcess.stderr.on('data', (data) => {
             errorOutput += data.toString();
-            console.error('Python Error:', data.toString());
+            console.error('Python error:', data.toString());
         });
 
         await new Promise((resolve, reject) => {
             pythonProcess.on('close', (code) => {
+                console.log('Python process exited with code:', code);
                 if (code !== 0) {
                     reject(new Error(`Python process failed: ${errorOutput}`));
                 } else {
@@ -169,10 +174,26 @@ app.post('/chat', async (req, res) => {
             });
         });
 
-        res.send(result.trim());
+        const cleanResponse = result.trim();
+        console.log('Sending response:', cleanResponse);
+        res.send(cleanResponse);
     } catch (error) {
         console.error('Server error:', error);
         res.status(500).send("😅 Oops! Had a little trouble there. Could you try again?");
+    }
+});
+
+// Add text generation endpoint
+app.post('/generate', (req, res) => {
+    const { message } = req.body;
+    try {
+        const response = textGenService.generateResponse(message);
+        res.json({ text: response });
+    } catch (error) {
+        console.error('Text generation error:', error);
+        res.status(500).json({ 
+            text: "I'm having trouble processing that. Could you rephrase?" 
+        });
     }
 });
 

@@ -6,7 +6,7 @@ from training_manager import TrainingManager  # Change to direct import
 from .tf_model import MathTFModel  # Now this will work
 import sympy
 from sympy.solvers import solve
-from sympy.parsing.sympy_parser import parse_expr
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
 
 # Expanded training data
 training_data = [
@@ -85,6 +85,59 @@ def solve_algebraic(problem):
     except Exception as e:
         return {"error": f"Could not solve equation: {str(e)}"}
 
+def solve_system_of_equations(equations):
+    """Solve a system of linear equations"""
+    try:
+        from sympy import symbols, solve
+        from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+        
+        x, y = symbols('x y')
+        transformations = standard_transformations + (implicit_multiplication_application,)
+        
+        # Convert equations to SymPy format
+        system = []
+        for eq in equations:
+            if '=' in eq:
+                left, right = eq.split('=')
+                # Convert to standard form: all terms on left side
+                expr = parse_expr(left, transformations=transformations) - parse_expr(right, transformations=transformations)
+                system.append(expr)
+        
+        print(f"Debug: Processing system: {system}")  # Debug line
+        
+        # Solve the system
+        solution = solve(system, [x, y])
+        print(f"Debug: Solution found: {solution}")  # Debug line
+        
+        if isinstance(solution, dict):
+            return ", ".join(f"{var} = {val}" for var, val in solution.items())
+        return str(solution)
+        
+    except Exception as e:
+        print(f"Debug: Error solving system: {str(e)}")  # Debug line
+        return f"Error solving system: {str(e)}"
+
+def extract_math_problem(message):
+    """Extract math problem from natural language question"""
+    clean_msg = message.lower()
+    
+    # Check for system of equations
+    if ('system' in clean_msg or ',' in clean_msg) and ('=' in clean_msg):
+        # Split on commas and newlines
+        potential_equations = re.split('[,\n]', clean_msg)
+        equations = []
+        
+        for eq in potential_equations:
+            # Look for equation patterns with variables
+            match = re.search(r'([0-9xy]+\s*[+\-*/]\s*[0-9xy]+\s*=\s*[0-9xy]+)', eq)
+            if match:
+                equations.append(match.group(1).strip())
+        
+        if len(equations) > 1:
+            return '\n'.join(equations)
+    
+    # ...rest of the method...
+
 class MathAI:
     def __init__(self):
         self.training_manager = TrainingManager()
@@ -105,6 +158,28 @@ class MathAI:
             self.tf_model.train(np.array(X), np.array(y))
 
     def solve_math(self, problem):
+        # Check if it's a system of equations
+        if ',' in problem or ('\n' in problem and '=' in problem):
+            equations = [eq.strip() for eq in problem.replace(',', '\n').split('\n') if eq.strip()]
+            if len(equations) > 1:
+                solution = solve_system_of_equations(equations)
+                return {
+                    "format": "json",
+                    "problem": {
+                        "input": equations,
+                        "type": "System of Equations"
+                    },
+                    "solution": {
+                        "answer": solution,
+                        "confidence": 100,
+                        "steps": [
+                            f"1. System of equations: {', '.join(equations)}",
+                            "2. Converting equations to standard form",
+                            f"3. Solution: {solution}"
+                        ]
+                    }
+                }
+        
         # Check if it's an algebraic problem
         if 'x' in problem or 'y' in problem:
             result = solve_algebraic(problem)

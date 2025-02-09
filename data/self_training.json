@@ -1,7 +1,7 @@
 {
     "learned_concepts": {
         "equation": {
-            "occurrences": 3,
+            "occurrences": 4,
             "context_examples": [
                 {
                     "user_msg": "7x + 3 = 5",
@@ -17,6 +17,11 @@
                     "user_msg": "67x + 11 = 23",
                     "ai_response": "\n<style>\n    @keyframes typeIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes fadeIn {\n        from { opacity: 0; }\n        to { opacity: 1; }\n    }\n    @keyframes slideIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes bounce {\n        0%, 100% { transform: translateY(0); }\n        50% { transform: translateY(-6px); }\n    }\n    @keyframes pulse {\n        0% { transform: scale(1); }\n        50% { transform: scale(1.05); }\n        100% { transform: scale(1); }\n    }\n    .math-text {\n        overflow: hidden;\n        white-space: nowrap;\n        animation: typeIn 1s steps(40, end);\n    }\n    .divider {\n        width: 100%;\n        height: 1px;\n        background: #ddd;\n        animation: slideIn 0.8s ease-out;\n    }\n    .fade-in {\n        opacity: 0;\n        animation: fadeIn 0.5s ease-out forwards;\n    }\n    .step-item {\n        animation: fadeIn 0.5s ease-out forwards;\n        animation-delay: calc(var(--index) * 0.2s);\n        opacity: 0;\n    }\n</style>\n\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">Problem: 67x + 11 = 23</div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Answer: x = 12/67\n    </div>\n    \n    <div class=\"fade-in\" style=\"margin-top: 10px; color: #666;\">\n        <div>Steps:</div>\n        <ul style=\"margin: 5px 0; padding-left: 20px;\">\n            <li class=\"step-item\" style=\"--index: 1\">1. Original equation: 67x + 11 = 23</li><li class=\"step-item\" style=\"--index: 2\">2. Rearranged to: 67*x - 12 = 0</li><li class=\"step-item\" style=\"--index: 3\">3. Solved for x: x = 12/67</li>\n        </ul>\n    </div>\n</div>",
                     "timestamp": "2025-02-09T11:29:03.536517"
+                },
+                {
+                    "user_msg": "2x + 98 = 102",
+                    "ai_response": "\n<style>\n    @keyframes typeIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes fadeIn {\n        from { opacity: 0; }\n        to { opacity: 1; }\n    }\n    @keyframes slideIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes bounce {\n        0%, 100% { transform: translateY(0); }\n        50% { transform: translateY(-6px); }\n    }\n    @keyframes pulse {\n        0% { transform: scale(1); }\n        50% { transform: scale(1.05); }\n        100% { transform: scale(1); }\n    }\n    .math-text {\n        overflow: hidden;\n        white-space: nowrap;\n        animation: typeIn 1s steps(40, end);\n    }\n    .divider {\n        width: 100%;\n        height: 1px;\n        background: #ddd;\n        animation: slideIn 0.8s ease-out;\n    }\n    .fade-in {\n        opacity: 0;\n        animation: fadeIn 0.5s ease-out forwards;\n    }\n    .step-item {\n        animation: fadeIn 0.5s ease-out forwards;\n        animation-delay: calc(var(--index) * 0.2s);\n        opacity: 0;\n    }\n</style>\n\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">Problem: 2x + 98 = 102</div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Answer: x = 2\n    </div>\n    \n    <div class=\"fade-in\" style=\"margin-top: 10px; color: #666;\">\n        <div>Steps:</div>\n        <ul style=\"margin: 5px 0; padding-left: 20px;\">\n            <li class=\"step-item\" style=\"--index: 1\">1. Original equation: 2x + 98 = 102</li><li class=\"step-item\" style=\"--index: 2\">2. Rearranged to: 2*x - 4 = 0</li><li class=\"step-item\" style=\"--index: 3\">3. Solved for x: x = 2</li>\n        </ul>\n    </div>\n</div>",
+                    "timestamp": "2025-02-09T11:54:03.222885"
                 }
             ]
         }
@@ -248,12 +253,72 @@
             "user_msg": "Thanks",
             "ai_response": "\u2753 \ud83e\udd14... Based on similar conversations, I think: I'm not sure I understand. Could you please rephrase? \ud83e\udd14",
             "timestamp": "2025-02-09T11:30:35.201912"
+        },
+        {
+            "user_msg": "Hello",
+            "ai_response": "\ud83d\udcd0 \ud83d\ude0a... Good morning! Ready for some math? \u23f0",
+            "timestamp": "2025-02-09T11:33:58.587250"
+        },
+        {
+            "user_msg": "454354352312+41",
+            "ai_response": "\n<style>\n    @keyframes typeIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes fadeIn {\n        from { opacity: 0; }\n        to { opacity: 1; }\n    }\n    @keyframes slideIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes bounce {\n        0%, 100% { transform: translateY(0); }\n        50% { transform: translateY(-6px); }\n    }\n    @keyframes pulse {\n        0% { transform: scale(1); }\n        50% { transform: scale(1.05); }\n        100% { transform: scale(1); }\n    }\n    .math-text {\n        overflow: hidden;\n        white-space: nowrap;\n        animation: typeIn 1s steps(40, end);\n    }\n    .divider {\n        width: 100%;\n        height: 1px;\n        background: #ddd;\n        animation: slideIn 0.8s ease-out;\n    }\n    .fade-in {\n        opacity: 0;\n        animation: fadeIn 0.5s ease-out forwards;\n    }\n    .step-item {\n        animation: fadeIn 0.5s ease-out forwards;\n        animation-delay: calc(var(--index) * 0.2s);\n        opacity: 0;\n    }\n</style>\n\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">Problem: 454354352312+41</div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Answer: 454354352353.0\n    </div>\n    <div class=\"fade-in\" style=\"color: #666; margin-top: 5px;\">Fraction: None</div>\n    <div class=\"fade-in\" style=\"margin-top: 10px; color: #666;\">\n        <div>Steps:</div>\n        <ul style=\"margin: 5px 0; padding-left: 20px;\">\n            <li class=\"step-item\" style=\"--index: 1\">1. Read Addition problem: 454354352312+41</li><li class=\"step-item\" style=\"--index: 2\">2. Calculate result: 454354352353.0</li>\n        </ul>\n    </div>\n</div>",
+            "timestamp": "2025-02-09T11:37:25.900425"
+        },
+        {
+            "user_msg": "100*1000",
+            "ai_response": "\n<style>\n    @keyframes typeIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes fadeIn {\n        from { opacity: 0; }\n        to { opacity: 1; }\n    }\n    @keyframes slideIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes bounce {\n        0%, 100% { transform: translateY(0); }\n        50% { transform: translateY(-6px); }\n    }\n    @keyframes pulse {\n        0% { transform: scale(1); }\n        50% { transform: scale(1.05); }\n        100% { transform: scale(1); }\n    }\n    .math-text {\n        overflow: hidden;\n        white-space: nowrap;\n        animation: typeIn 1s steps(40, end);\n    }\n    .divider {\n        width: 100%;\n        height: 1px;\n        background: #ddd;\n        animation: slideIn 0.8s ease-out;\n    }\n    .fade-in {\n        opacity: 0;\n        animation: fadeIn 0.5s ease-out forwards;\n    }\n    .step-item {\n        animation: fadeIn 0.5s ease-out forwards;\n        animation-delay: calc(var(--index) * 0.2s);\n        opacity: 0;\n    }\n</style>\n\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">Problem: 100*1000</div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Answer: 100000.0\n    </div>\n    <div class=\"fade-in\" style=\"color: #666; margin-top: 5px;\">Fraction: None</div>\n    <div class=\"fade-in\" style=\"margin-top: 10px; color: #666;\">\n        <div>Steps:</div>\n        <ul style=\"margin: 5px 0; padding-left: 20px;\">\n            <li class=\"step-item\" style=\"--index: 1\">1. Read Multiplication problem: 100*1000</li><li class=\"step-item\" style=\"--index: 2\">2. Calculate result: 100000.0</li>\n        </ul>\n    </div>\n</div>",
+            "timestamp": "2025-02-09T11:38:20.999370"
+        },
+        {
+            "user_msg": "Thx",
+            "ai_response": "I'm not sure I understand. Could you please rephrase?",
+            "timestamp": "2025-02-09T11:39:07.781003"
+        },
+        {
+            "user_msg": "Hi my favorite",
+            "ai_response": "Oh! \u231a \ud83d\ude42 Good morning! Ready for some math? \ud83d\ude42",
+            "timestamp": "2025-02-09T11:44:23.618967"
+        },
+        {
+            "user_msg": "2x + 3y = 12, x - y = 4",
+            "ai_response": "Oh! \u270f\ufe0f \u2753 I don't see any proper math problem. Try asking something like '5 + 3' or '7 times 4' \u2753",
+            "timestamp": "2025-02-09T11:46:11.295713"
+        },
+        {
+            "user_msg": "2x + 3y = 12, x - y = 4",
+            "ai_response": "Oh! \ud83d\udcca \ud83d\udd22 I don't see any proper math problem. Try asking something like '5 + 3' or '7 times 4' \ud83d\udd22",
+            "timestamp": "2025-02-09T11:49:58.656703"
+        },
+        {
+            "user_msg": "Hello, Test Test one two three.",
+            "ai_response": "Oh! \ud83d\ude42 \ud83d\udcd0 Good morning! Ready for some math? \ud83d\ude42",
+            "timestamp": "2025-02-09T11:52:35.270016"
+        },
+        {
+            "user_msg": "solve 2x + 3y = 12, x - y = 4",
+            "ai_response": "I don't see any proper math problem. Try asking something like '5 + 3' or '7 times 4' \ud83d\udcca \ud83e\udd14 \ud83d\udcd0 \u2753",
+            "timestamp": "2025-02-09T11:53:10.022419"
+        },
+        {
+            "user_msg": "2x + 98 = 102",
+            "ai_response": "\n<style>\n    @keyframes typeIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes fadeIn {\n        from { opacity: 0; }\n        to { opacity: 1; }\n    }\n    @keyframes slideIn {\n        from { width: 0; }\n        to { width: 100%; }\n    }\n    @keyframes bounce {\n        0%, 100% { transform: translateY(0); }\n        50% { transform: translateY(-6px); }\n    }\n    @keyframes pulse {\n        0% { transform: scale(1); }\n        50% { transform: scale(1.05); }\n        100% { transform: scale(1); }\n    }\n    .math-text {\n        overflow: hidden;\n        white-space: nowrap;\n        animation: typeIn 1s steps(40, end);\n    }\n    .divider {\n        width: 100%;\n        height: 1px;\n        background: #ddd;\n        animation: slideIn 0.8s ease-out;\n    }\n    .fade-in {\n        opacity: 0;\n        animation: fadeIn 0.5s ease-out forwards;\n    }\n    .step-item {\n        animation: fadeIn 0.5s ease-out forwards;\n        animation-delay: calc(var(--index) * 0.2s);\n        opacity: 0;\n    }\n</style>\n\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">Problem: 2x + 98 = 102</div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Answer: x = 2\n    </div>\n    \n    <div class=\"fade-in\" style=\"margin-top: 10px; color: #666;\">\n        <div>Steps:</div>\n        <ul style=\"margin: 5px 0; padding-left: 20px;\">\n            <li class=\"step-item\" style=\"--index: 1\">1. Original equation: 2x + 98 = 102</li><li class=\"step-item\" style=\"--index: 2\">2. Rearranged to: 2*x - 4 = 0</li><li class=\"step-item\" style=\"--index: 3\">3. Solved for x: x = 2</li>\n        </ul>\n    </div>\n</div>",
+            "timestamp": "2025-02-09T11:54:03.223068"
+        },
+        {
+            "user_msg": "Hey there, whats up today?",
+            "ai_response": "\ud83d\ude42 \ud83d\udca1... Good morning! Ready for some math? \ud83d\udcd0",
+            "timestamp": "2025-02-09T11:56:04.333153"
+        },
+        {
+            "user_msg": "solve 2x + 3y = 12, x - y = 4",
+            "ai_response": "\n<div style=\"background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;\">\n    <div class=\"math-text\" style=\"font-size: 18px; color: #333;\">\n        System of Equations:<br>\n        2x + 3y = 12<br>x - y = 4\n    </div>\n    <div class=\"divider\" style=\"margin: 10px 0;\"></div>\n    <div class=\"fade-in\" style=\"color: #2196F3; font-size: 20px;\">\n        Solution: x = 24/5, y = 4/5\n    </div>\n</div>",
+            "timestamp": "2025-02-09T11:56:20.744468"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-09T11:30:35.201918",
+        "last_updated": "2025-02-09T11:56:20.744616",
         "version": "1.0",
-        "total_conversations": 44,
+        "total_conversations": 56,
         "learning_sessions": 0
     }
 }

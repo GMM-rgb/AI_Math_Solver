@@ -60,7 +60,64 @@
             "answer": 6,
             "steps": ["Multiply -3 by -2"],
             "variations": ["what is -3 times -2", "-3 times -2", "product of -3 and -2"]
-        }         
+        },
+        {
+            "input": "2x + 3y = 12, x - y = 4",
+            "answer": "x = 8, y = 4",
+            "steps": [
+                "Solve for x in the second equation: x = y + 4",
+                "Substitute x in the first equation: 2(y + 4) + 3y = 12",
+                "Expand: 2y + 8 + 3y = 12",
+                "Combine like terms: 5y + 8 = 12",
+                "Subtract 8 from both sides: 5y = 4",
+                "Divide by 5: y = 4",
+                "Substitute y = 4 into x = y + 4",
+                "Solve for x: x = 8"
+            ],
+            "variations": [
+                "solve the system 2x + 3y = 12 and x - y = 4",
+                "find x and y for 2x + 3y = 12, x - y = 4",
+                "determine the values of x and y in 2x + 3y = 12 and x - y = 4"
+            ]
+        },
+        {
+            "input": "3x - 2y = 7, x + y = 5",
+            "answer": "x = 3, y = 2",
+            "steps": [
+                "Solve for x in the second equation: x = 5 - y",
+                "Substitute x in the first equation: 3(5 - y) - 2y = 7",
+                "Expand: 15 - 3y - 2y = 7",
+                "Combine like terms: 15 - 5y = 7",
+                "Subtract 15 from both sides: -5y = -8",
+                "Divide by -5: y = 2",
+                "Substitute y = 2 into x = 5 - y",
+                "Solve for x: x = 3"
+            ],
+            "variations": [
+                "solve for x and y in 3x - 2y = 7 and x + y = 5",
+                "find the solution to 3x - 2y = 7 and x + y = 5",
+                "determine x and y for the system 3x - 2y = 7, x + y = 5"
+            ]
+        },
+        {
+            "input": "4x + y = 10, 2x - 3y = -2",
+            "answer": "x = 2, y = 2",
+            "steps": [
+                "Solve for y in the first equation: y = 10 - 4x",
+                "Substitute y in the second equation: 2x - 3(10 - 4x) = -2",
+                "Expand: 2x - 30 + 12x = -2",
+                "Combine like terms: 14x - 30 = -2",
+                "Add 30 to both sides: 14x = 28",
+                "Divide by 14: x = 2",
+                "Substitute x = 2 into y = 10 - 4x",
+                "Solve for y: y = 2"
+            ],
+            "variations": [
+                "find the solution to 4x + y = 10, 2x - 3y = -2",
+                "solve the system 4x + y = 10 and 2x - 3y = -2",
+                "determine x and y for 4x + y = 10, 2x - 3y = -2"
+            ]
+        }
     ],
     "math_patterns": {
         "what is": ["what's", "whats", "what is", "tell me"],
@@ -69,6 +126,13 @@
             "minus": ["-", "subtract", "difference", "minus", "take away"],
             "times": ["*", "multiply", "times", "multiplied by"],
             "divide": ["/", "divide", "divided by", "over"]
+        },
+        "system_of_equations": {
+            "indicators": ["system", "equations", ","],
+            "patterns": [
+                "([0-9]*[xy][^=]*=[^,\\n]+)",
+                "([\\d]*[xy][\\s]*[+\\-][\\s]*[\\d]*[xy][\\s]*=[\\s]*[\\d]+)"
+            ]
         }
     },
     "personalities": {

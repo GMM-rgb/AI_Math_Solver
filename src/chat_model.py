@@ -48,6 +48,8 @@ class SimpleMathModel:
             '/': lambda x, y: x / y,
             '^': lambda x, y: x ** y
         }
+        from sympy import symbols
+        self.x, self.y, self.z = symbols('x y z')
 
     def _identify_problem_type(self, problem):
         """Identify the type of math problem"""
@@ -105,7 +107,55 @@ class SimpleMathModel:
                 pass
         return {"decimal": result}
 
+    def solve_system_of_equations(self, equations):
+        """Solve a system of linear equations"""
+        try:
+            # Parse equations using sympy
+            from sympy import solve
+            from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+            transformations = standard_transformations + (implicit_multiplication_application,)
+            
+            parsed_eqs = []
+            for eq in equations:
+                # Split into LHS and RHS
+                lhs, rhs = [side.strip() for side in eq.split('=')]
+                # Convert to standard form (all terms on LHS)
+                eq_standardized = parse_expr(lhs, transformations=transformations) - parse_expr(rhs, transformations=transformations)
+                parsed_eqs.append(eq_standardized)
+            
+            # Solve the system
+            solution = solve(parsed_eqs, [self.x, self.y])
+            
+            if not solution:
+                return "No solution exists"
+            
+            # Format the solution
+            if isinstance(solution, dict):
+                return ", ".join([f"{var} = {val}" for var, val in solution.items()])
+            
+            return str(solution)
+            
+        except Exception as e:
+            return f"Error solving system: {str(e)}"
+
     def solve(self, problem):
+        # Handle system of equations first
+        if '\n' in problem or ',' in problem:
+            equations = [eq.strip() for eq in problem.replace(',', '\n').split('\n') if eq.strip()]
+            if len(equations) > 1:
+                solution = self.solve_system_of_equations(equations)
+                return {
+                    "answer": solution,
+                    "type": "System of Equations",
+                    "confidence": 100,
+                    "steps": [
+                        f"1. Original system:",
+                        *[f"   {eq}" for eq in equations],
+                        "2. Solving simultaneously...",
+                        f"3. Solution: {solution}"
+                    ]
+                }
+
         try:
             # Handle algebraic equations first
             if 'x' in problem or '=' in problem:
@@ -204,6 +254,29 @@ class ChatBot:
 
     def extract_math_problem(self, message):
         """Extract math problem from natural language question"""
+        clean_msg = message.lower()
+        
+        # Improved system of equations detection
+        if any(word in clean_msg for word in ['system', 'equations']) or (',' in clean_msg and '=' in clean_msg):
+            # Remove common words that might interfere
+            clean_msg = clean_msg.replace('solve', '').replace('the', '').replace('system', '').replace('of', '').replace('equations', '')
+            
+            # Split by comma or newline and clean each equation
+            equations = []
+            for eq in re.split('[,\n]', clean_msg):
+                # Enhanced equation pattern matching
+                eq = eq.strip()
+                if '=' in eq:
+                    # Match pattern like "2x + 3y = 12" or "x - y = 4"
+                    match = re.search(r'([0-9]*[xy][^=]*=[^,\n]+)', eq)
+                    if match:
+                        equations.append(match.group(1).strip())
+            
+            if len(equations) > 1:
+                print(f"Debug: Found system of equations: {equations}")  # Debug line
+                return '\n'.join(equations)
+        
+        # Continue with existing single equation/expression extraction
         # Remove common phrases and unwanted punctuation
         clean_msg = message.lower()
         
@@ -281,8 +354,19 @@ class ChatBot:
 
     def handle_math(self, message):
         math_problem = self.extract_math_problem(message)
-        if (math_problem):
+        print(f"Debug: Extracted math problem: {math_problem}")  # Debug line
+        
+        if math_problem:
             try:
+                # Improved system of equations handling
+                if ',' in message or '\n' in math_problem:
+                    equations = [eq.strip() for eq in math_problem.split('\n') if eq.strip()]
+                    print(f"Debug: Processing equations: {equations}")  # Debug line
+                    if len(equations) > 1:
+                        result = self.math_model.solve_system_of_equations(equations)
+                        return self._format_system_solution(equations, result)
+                
+                # Continue with existing single equation/expression handling
                 result = self.math_model.solve(math_problem)
                 if "error" not in result:
                     # Create the math solution HTML first
@@ -366,6 +450,20 @@ class ChatBot:
             ['math', 'think']
         )
     
+    def _format_system_solution(self, equations, result):
+        """Format the system of equations solution with HTML"""
+        return f"""
+<div style="background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;">
+    <div class="math-text" style="font-size: 18px; color: #333;">
+        System of Equations:<br>
+        {'<br>'.join(equations)}
+    </div>
+    <div class="divider" style="margin: 10px 0;"></div>
+    <div class="fade-in" style="color: #2196F3; font-size: 20px;">
+        Solution: {result}
+    </div>
+</div>"""
+
     def handle_greeting(self, message):
         hour = datetime.now().hour
         if hour < 12:

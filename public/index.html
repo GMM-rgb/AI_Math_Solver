@@ -1515,6 +1515,65 @@
             }
         }
     </script>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // Add install prompt
+        let deferredPrompt;
+        const installButton = document.createElement('button');
+        installButton.style.display = 'none';
+        installButton.className = 'install-button';
+        installButton.textContent = 'Install App';
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response to the install prompt: ${outcome}`);
+                    deferredPrompt = null;
+                    installButton.style.display = 'none';
+                }
+            });
+        });
+
+        // Add to chatHeader section
+        document.getElementById('chatHeader').appendChild(installButton);
+    </script>
+    <style>
+        .install-button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .install-button:hover {
+            background: #1976D2;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">

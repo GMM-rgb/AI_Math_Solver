@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AI Math Solver</title>
     <style>
         /* Base styles */
@@ -303,6 +303,10 @@
             border: 1px solid #ccc;
             border-radius: 10px;
             outline: none;
+            font-size: 16px !important; /* Minimum font size to prevent zoom */
+            -webkit-text-size-adjust: 100%;
+            max-height: 44px !important;
+            touch-action: manipulation;
         }
 
         .typing-indicator {
@@ -507,6 +511,19 @@
                 min-height: 44px;
                 font-size: 16px; /* Prevent zoom on iOS */
                 height: 44px !important;  /* Taller input on mobile */
+            }
+
+            input[type="text"], 
+            input[type="number"],
+            select,
+            textarea {
+                font-size: 16px !important; /* Prevents zoom on all form elements */
+                -webkit-appearance: none;
+            }
+
+            #userInput {
+                transform: translateZ(0); /* Hardware acceleration */
+                -webkit-transform: translateZ(0);
             }
         }
 

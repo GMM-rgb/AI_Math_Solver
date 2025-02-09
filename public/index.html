@@ -96,15 +96,14 @@
         }
 
         .chat-messages {
-            height: calc(100vh - 200px);
-            max-height: 600px;
-            overflow-y: auto;
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: white;
+            height: calc(100vh - 180px);
+            max-height: none;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
             scroll-behavior: smooth;
+            padding-bottom: 60px; /* Extra padding for mobile */
+            position: relative;
+            will-change: scroll-position;  /* Optimize scrolling performance */
         }
 
         .chat-messages.typing {
@@ -119,6 +118,10 @@
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .user-message {
@@ -370,11 +373,25 @@
             .chat-container {
                 width: 100%;
                 margin-left: 0;
-                padding-bottom: 70px;
+                padding-bottom: 80px;
+            }
+
+            .chat-messages {
+                height: calc(100vh - 160px);
+                padding-bottom: 80px;
+                margin-bottom: 0;
             }
 
             .input-container {
                 padding: 10px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 10px;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                z-index: 1000;
             }
 
             .image-upload label {
@@ -420,6 +437,13 @@
             .ai-message {
                 margin-right: 10px;
             }
+        }
+
+        /* Add scroll lock class */
+        .scroll-lock {
+            overflow: hidden !important;
+            position: fixed;
+            width: 100%;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
@@ -681,6 +705,12 @@
             // Add user message
             addMessage(message, true);
             input.value = '';
+            scrollToBottom();  // Scroll after user message
+
+            // Lock body scroll on mobile
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('scroll-lock');
+            }
 
             // Add thinking indicator
             const messages = document.getElementById('chatMessages');
@@ -695,10 +725,9 @@
                 </div>
             `;
             messages.appendChild(thinkingDiv);
-            messages.scrollTop = messages.scrollHeight;
+            scrollToBottom(false);  // Instant scroll for thinking indicator
 
             try {
-                lockScroll(true);
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -724,11 +753,16 @@
                 } catch {
                     await addMessage(result, false, true);
                 }
-                lockScroll(false);
+                
+                // Unlock scroll and scroll to bottom
+                document.body.classList.remove('scroll-lock');
+                scrollToBottom();
+                
             } catch (error) {
                 messages.removeChild(thinkingDiv);
-                lockScroll(false);
+                document.body.classList.remove('scroll-lock');
                 addMessage("I couldn't process that. Please try again.", false);
+                scrollToBottom();
             }
         }
 
@@ -973,7 +1007,39 @@
                     closeConversationList();
                 }
             });
+
+            // Add touch event listeners for better mobile scrolling
+            const messages = document.getElementById('chatMessages');
+            let touchStartY;
+
+            messages.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            messages.addEventListener('touchmove', (e) => {
+                const touchY = e.touches[0].clientY;
+                const isAtBottom = messages.scrollHeight - messages.scrollTop === messages.clientHeight;
+                const isAtTop = messages.scrollTop === 0;
+                
+                // Prevent overscroll only at boundaries
+                if ((isAtBottom && touchY < touchStartY) || (isAtTop && touchY > touchStartY)) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
         });
+
+        // Add these new scroll management functions
+        function scrollToBottom(smooth = true) {
+            const messages = document.getElementById('chatMessages');
+            const lastMessage = messages.lastElementChild;
+            
+            if (lastMessage) {
+                lastMessage.scrollIntoView({
+                    behavior: smooth ? 'smooth' : 'auto',
+                    block: 'end'
+                });
+            }
+        }
     </script>
 </head>
 <body>

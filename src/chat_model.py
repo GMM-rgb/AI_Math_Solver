@@ -275,8 +275,7 @@ class ChatBot:
                 f"{emoji_prefix}... {message}{emoji_suffix}",
                 f"Oh! {emoji_prefix} {message}{emoji_suffix}",
             ]
-            response = random.choice(phrases)
-            return response.encode('utf-8').decode('utf-8')
+            return random.choice(phrases)
         except UnicodeEncodeError:
             return message
 

@@ -63,23 +63,22 @@ app.post('/chat', async (req, res) => {
         ], {
             env: {
                 ...process.env,
-                PYTHONPATH: projectRoot,
                 PYTHONIOENCODING: 'utf-8',
                 PYTHONUTF8: '1',
-                LANG: 'en_US.UTF-8'
-            },
-            cwd: projectRoot  // Set working directory to project root
+                LANG: 'C.UTF-8'
+            }
         });
 
         let result = '';
-        let errorOutput = '';
 
         pythonProcess.stdout.setEncoding('utf8');
         pythonProcess.stderr.setEncoding('utf8');
 
         pythonProcess.stdout.on('data', (data) => {
-            result += data.toString('utf8');
+            result += data.toString();
         });
+
+        let errorOutput = '';
 
         pythonProcess.stderr.on('data', (data) => {
             errorOutput += data.toString();
@@ -101,20 +100,19 @@ app.post('/chat', async (req, res) => {
             });
         });
 
-        // Try to parse result as JSON, fallback to plain text
-        try {
-            const jsonResult = JSON.parse(result);
-            res.json(jsonResult);
-        } catch {
+        // Clean up the response
+        result = result.trim();
+        
+        // If it's HTML (math solution), send as-is
+        if (result.startsWith('<')) {
+            res.send(result);
+        } else {
+            // For regular chat messages, send as plain text
             res.send(result);
         }
     } catch (error) {
         console.error('Server error:', error);
-        res.status(500).json({
-            error: 'Error processing request',
-            details: error.message,
-            format: 'json'
-        });
+        res.status(500).send('Error processing request');
     }
 });
 

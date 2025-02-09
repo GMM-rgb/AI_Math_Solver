@@ -222,19 +222,53 @@ class ChatBot:
             try:
                 result = self.math_model.solve(math_problem)
                 if "error" not in result:
-                    # Create a nice HTML formatted output
+                    # Create HTML output with animation classes
                     html_output = f"""
+<style>
+    @keyframes typeIn {{
+        from {{ width: 0; }}
+        to {{ width: 100%; }}
+    }}
+    @keyframes fadeIn {{
+        from {{ opacity: 0; }}
+        to {{ opacity: 1; }}
+    }}
+    @keyframes slideIn {{
+        from {{ width: 0; }}
+        to {{ width: 100%; }}
+    }}
+    .math-text {{
+        overflow: hidden;
+        white-space: nowrap;
+        animation: typeIn 1s steps(40, end);
+    }}
+    .divider {{
+        width: 100%;
+        height: 1px;
+        background: #ddd;
+        animation: slideIn 0.8s ease-out;
+    }}
+    .fade-in {{
+        opacity: 0;
+        animation: fadeIn 0.5s ease-out forwards;
+    }}
+    .step-item {{
+        animation: fadeIn 0.5s ease-out forwards;
+        animation-delay: calc(var(--index) * 0.2s);
+        opacity: 0;
+    }}
+</style>
 <div style="background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;">
-    <div style="font-size: 18px; color: #333;">Problem: {math_problem}</div>
-    <div style="border-bottom: 1px solid #ddd; margin: 10px 0;"></div>
-    <div style="color: #2196F3; font-size: 20px;">
+    <div class="math-text" style="font-size: 18px; color: #333;">Problem: {math_problem}</div>
+    <div class="divider" style="margin: 10px 0;"></div>
+    <div class="fade-in" style="color: #2196F3; font-size: 20px;">
         Answer: {result['answer'] if 'answer' in result else result.get('decimal')}
     </div>
-    {f'<div style="color: #666; margin-top: 5px;">Fraction: {result["fraction"]}</div>' if 'fraction' in result else ''}
-    <div style="margin-top: 10px; color: #666;">
+    {f'<div class="fade-in" style="color: #666; margin-top: 5px;">Fraction: {result["fraction"]}</div>' if 'fraction' in result else ''}
+    <div class="fade-in" style="margin-top: 10px; color: #666;">
         <div>Steps:</div>
         <ul style="margin: 5px 0; padding-left: 20px;">
-            {''.join(f'<li>{step}</li>' for step in result["steps"])}
+            {''.join(f'<li class="step-item" style="--index: {i+1}">{step}</li>' for i, step in enumerate(result["steps"]))}
         </ul>
     </div>
 </div>
@@ -310,12 +344,16 @@ class ChatBot:
 if __name__ == "__main__":
     import sys
     import io
+    import os
+
+    # Redirect debug output to stderr
+    debug_output = sys.stderr
 
     # Force UTF-8 encoding for Windows console
     if sys.platform.startswith('win'):
         try:
             import subprocess
-            subprocess.run(['chcp', '65001'], shell=True, check=True)
+            subprocess.run(['chcp', '65001'], shell=True, check=True, stdout=debug_output, stderr=debug_output)
         except:
             pass
     
@@ -323,16 +361,26 @@ if __name__ == "__main__":
     sys.stdout.reconfigure(encoding='utf-8', errors='replace') if hasattr(sys.stdout, 'reconfigure') else None
 
     if len(sys.argv) < 2:
-        print("No message provided.", file=sys.stderr)
+        print("No message provided.", file=debug_output)
         sys.exit(1)
     
     try:
+        # Temporarily redirect stdout to capture only chat output
+        original_stdout = sys.stdout
+        chat_output = io.StringIO()
+        sys.stdout = chat_output
+
         chatbot = ChatBot()
         response = chatbot.get_response(sys.argv[1])
-        # Don't encode/decode if it's HTML output
+        
+        # Reset stdout
+        sys.stdout = original_stdout
+
+        # Print only the chat response
         if response.strip().startswith('<div'):
             print(response)
         else:
             print(response.encode('utf-8', errors='replace').decode('utf-8'))
+
     except Exception as e:
-        print(f"Error: {str(e)}", file=sys.stderr)
+        print(f"Error: {str(e)}", file=debug_output)

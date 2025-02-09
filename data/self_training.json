@@ -16,7 +16,12 @@
             ]
         }
     },
-    "definitions": {},
+    "definitions": {
+        "lemon": {
+            "definition": "The lion  is a large cat of the genus Panthera, native to Africa and India.",
+            "added": "2025-02-09T11:17:43.470023"
+        }
+    },
     "patterns": {},
     "conversation_history": [
         {
@@ -188,12 +193,32 @@
             "user_msg": "Hi",
             "ai_response": "\ud83d\udd22 \ud83d\udca1 Good morning! Ready for some math? \ud83d\udd22",
             "timestamp": "2025-02-09T11:12:49.510449"
+        },
+        {
+            "user_msg": "Sure",
+            "ai_response": "I'm not sure I understand. Could you please rephrase?",
+            "timestamp": "2025-02-09T11:13:37.113075"
+        },
+        {
+            "user_msg": "huh",
+            "ai_response": "I'm not sure I understand. Could you please rephrase?",
+            "timestamp": "2025-02-09T11:18:04.234590"
+        },
+        {
+            "user_msg": "nevermind",
+            "ai_response": "I'm not sure I understand. Could you please rephrase?",
+            "timestamp": "2025-02-09T11:18:11.436333"
+        },
+        {
+            "user_msg": "Hi",
+            "ai_response": "\u270f\ufe0f \ud83d\ude0a Good morning! Ready for some math? \ud83d\udca1",
+            "timestamp": "2025-02-09T11:18:56.630951"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-09T11:12:49.510452",
+        "last_updated": "2025-02-09T11:18:56.630955",
         "version": "1.0",
-        "total_conversations": 34,
+        "total_conversations": 38,
         "learning_sessions": 0
     }
 }

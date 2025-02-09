@@ -408,12 +408,22 @@
             "user_msg": "Solve 2x + 3y = 12, x \u2212 y = 2",
             "ai_response": "\n<div class=\"math-solution\">\n    <div class=\"math-problem\">\n        <h3>System of Equations:</h3>\n        <div class=\"equations\">\n            <div class=\"equation\">2x + 3y = 12</div><br><div class=\"equation\">x \u2212 y = 2</div>\n        </div>\n    </div>\n    <div class=\"solution\">\n        <h3>Solution Steps:</h3>\n        <div class=\"steps\">\n            <div class=\"step\" style=\"--index: 1\">1. Original system of equations</div><div class=\"step\" style=\"--index: 2\">   2x + 3y = 12</div><div class=\"step\" style=\"--index: 3\">   x \u2212 y = 2</div><div class=\"step\" style=\"--index: 4\">2. Using substitution method</div><div class=\"step\" style=\"--index: 5\">3. Solving simultaneously...</div><div class=\"step\" style=\"--index: 6\">4. Final solution: x = 3 - \u221a(3)*\u221a(3*\u2212^2 - \u2212)/\u2212, y = 2 + 2*\u221a(3)*\u221a(3*\u2212^2 - \u2212)/(3*\u2212) or x = 3 + \u221a(3)*\u221a(3*\u2212^2 - \u2212)/\u2212, y = 2 - 2*\u221a(3)*\u221a(3*\u2212^2 - \u2212)/(3*\u2212)</div>\n        </div>\n        <div class=\"final-result\">\n            <h3>Final Answer:</h3>\n            <div class=\"result\">x = 3 - \u221a(3)*\u221a(3*\u2212^2 - \u2212)/\u2212, y = 2 + 2*\u221a(3)*\u221a(3*\u2212^2 - \u2212)/(3*\u2212) or x = 3 + \u221a(3)*\u221a(3*\u2212^2 - \u2212)/\u2212, y = 2 - 2*\u221a(3)*\u221a(3*\u2212^2 - \u2212)/(3*\u2212)</div>\n        </div>\n    </div>\n</div>\n<style>\n    .math-solution {\n        opacity: 1 !important;\n        background-color: #f8f9fa;\n        border: 1px solid #e9ecef;\n        border-radius: 8px;\n        padding: 20px;\n        margin: 15px 0;\n        box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n        font-family: 'Arial', sans-serif;\n    }\n    .math-solution * {\n        opacity: 1 !important;\n    }\n    .equation, .step {\n        display: block;\n        opacity: 1 !important;\n        transform: none;\n        animation: gentleFade 0.5s ease-out;\n        animation-delay: calc(var(--index) * 0.1s);\n    }\n    @keyframes gentleFade {\n        from { \n            opacity: 0.9 !important;\n            transform: translateY(-2px);\n        }\n        to { \n            opacity: 1 !important;\n            transform: translateY(0);\n        }\n    }\n    .math-solution h3 {\n        color: #2196F3;\n        margin: 0 0 10px 0;\n        font-size: 1.2em;\n    }\n    .equations {\n        margin: 10px 0;\n        padding: 10px;\n        background-color: white;\n        border-radius: 4px;\n    }\n    .equation {\n        font-family: 'Consolas', monospace;\n        font-size: 1.1em;\n        margin: 5px 0;\n        color: #333;\n        padding: 5px;\n        border-radius: 4px;\n    }\n    .equation:hover {\n        background-color: rgba(33, 150, 243, 0.05);\n    }\n    .solution {\n        margin-top: 15px;\n        padding-top: 15px;\n        border-top: 1px solid #e9ecef;\n    }\n    .steps {\n        margin: 15px 0;\n        padding: 10px;\n        background-color: white;\n        border-radius: 4px;\n    }\n    .step {\n        margin: 8px 0;\n        padding: 8px;\n        color: #555;\n        font-size: 1em;\n        border-radius: 4px;\n        transition: background-color 0.2s ease;\n    }\n    .step:hover {\n        background-color: rgba(33, 150, 243, 0.05);\n    }\n    .result {\n        font-size: 1.2em;\n        color: #28a745;\n        font-weight: bold;\n        padding: 10px;\n        background-color: white;\n        border-radius: 4px;\n    }\n    @keyframes highlightAnswer {\n        0% { background-color: rgba(40, 167, 69, 0.1); }\n        50% { background-color: rgba(40, 167, 69, 0.05); }\n        100% { background-color: white; }\n    }\n</style>",
             "timestamp": "2025-02-09T12:55:48.169818"
+        },
+        {
+            "user_msg": "Hello there bro",
+            "ai_response": "\ud83d\udcd0 \ud83d\udd50... Good afternoon! Let's solve some problems! \ud83d\ude42",
+            "timestamp": "2025-02-09T13:01:08.575883"
+        },
+        {
+            "user_msg": "Hey",
+            "ai_response": "Good afternoon! Let's solve some problems! \u23f0 \ud83d\udd22 \ud83d\ude42",
+            "timestamp": "2025-02-09T13:03:09.545034"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-09T12:55:48.169984",
+        "last_updated": "2025-02-09T13:03:09.545039",
         "version": "1.0",
-        "total_conversations": 74,
+        "total_conversations": 76,
         "learning_sessions": 0
     }
 }

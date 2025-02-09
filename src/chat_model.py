@@ -110,7 +110,7 @@ class SimpleMathModel:
     def solve_system_of_equations(self, equations):
         """Solve a system of linear equations"""
         try:
-            from sympy import symbols, solve, simplify
+            from sympy import symbols, solve, simplify, latex
             from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
             
             x, y = symbols('x y')
@@ -125,31 +125,40 @@ class SimpleMathModel:
             
             solution = solve(system, [x, y])
             
-            # Clean and format the solution
-            def format_value(val):
+            def clean_solution(expr):
                 try:
-                    # Try to simplify and clean up the expression
-                    simplified = simplify(val)
-                    # Convert to a nicer string representation
-                    result = str(simplified).replace('**', '^').replace('sqrt', '√')
-                    # Remove unnecessary parentheses and spaces
-                    result = result.replace('*(', '(').replace('+ -', '- ')
+                    # First try standard simplification
+                    simp = simplify(expr)
+                    # Convert to a string and clean up
+                    result = str(simp)
+                    # Replace mathematical notations with cleaner versions
+                    result = (result.replace('sqrt', '√')
+                                  .replace('**', '^')
+                                  .replace('*', '×')
+                                  .replace('+-', '-')
+                                  .replace('-+', '-'))
+                    # Remove unnecessary symbols and spaces
+                    result = result.replace('×1', '').replace('1×', '')
+                    # Clean up negative signs
+                    result = result.replace('+ -', '- ').replace('- -', '+ ')
                     return result
                 except:
-                    return str(val)
+                    return str(expr)
 
+            # Format the solution based on its type
             if isinstance(solution, dict):
-                return ", ".join(f"{var} = {format_value(val)}" for var, val in solution.items())
+                return ", ".join(f"{var} = {clean_solution(val)}" for var, val in solution.items())
             elif isinstance(solution, list):
                 formatted = []
                 for sol in solution:
                     if isinstance(sol, tuple):
-                        x_val = format_value(sol[0])
-                        y_val = format_value(sol[1])
+                        x_val = clean_solution(sol[0])
+                        y_val = clean_solution(sol[1])
+                        # Further simplify if possible
                         formatted.append(f"x = {x_val}, y = {y_val}")
                 return " or ".join(formatted)
             
-            return format_value(solution)
+            return clean_solution(solution)
             
         except Exception as e:
             return f"Error solving system: {str(e)}"
@@ -518,11 +527,10 @@ function handleFeedback(isPositive) {{
         if not steps:
             # Default steps if not found in training data
             steps = [
-                "1. Original system of equations",
+                "1. Original system of equations:",
                 *[f"   {eq}" for eq in equations],
-                "2. Using substitution method",
-                "3. Solving simultaneously...",
-                f"4. Final solution: {result}"
+                "2. Solving the system...",
+                f"3. Solution: {result}"
             ]
 
         return f"""

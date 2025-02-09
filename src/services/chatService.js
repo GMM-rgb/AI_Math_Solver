@@ -29,31 +29,42 @@ class ChatService {
             await this.initialize();
         }
 
-        const match = this.matcher.findBestMatch(message);
-        
-        if (match) {
-            switch (match.type) {
-                case 'conversation':
-                    return {
-                        response: this.getRandomResponse(match.data.responses),
-                        confidence: match.score * 100,
-                        type: 'chat'
-                    };
-                    
-                case 'math_pattern':
-                    return {
-                        response: message,
-                        confidence: 100,
-                        type: 'math'
-                    };
+        // First check for exact matches in conversations
+        for (const conv of this.trainingData.conversations) {
+            if (conv.variations.includes(message.toLowerCase())) {
+                return {
+                    response: this.getRandomResponse(conv.responses),
+                    confidence: 100,
+                    type: 'chat'
+                };
             }
         }
 
-        // Default to math processing if no conversational match
+        // Then check for math patterns
+        const mathPattern = /[\d+\-*/()=xy]/;
+        if (mathPattern.test(message)) {
+            return {
+                response: message,
+                confidence: 90,
+                type: 'math'
+            };
+        }
+
+        // Check for similar conversations
+        const match = this.matcher.findBestMatch(message);
+        if (match && match.score > 0.6) {
+            return {
+                response: this.getRandomResponse(match.data.responses),
+                confidence: match.score * 100,
+                type: 'chat'
+            };
+        }
+
+        // Default response for unknown input
         return {
-            response: message,
-            confidence: 60,
-            type: 'math'
+            response: "I'm not sure how to respond to that. Would you like to try a math problem?",
+            confidence: 50,
+            type: 'chat'
         };
     }
 

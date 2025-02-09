@@ -7,8 +7,8 @@ from pathlib import Path
 from fractions import Fraction
 from sympy.solvers import solve
 from sympy.parsing.sympy_parser import parse_expr
-from utils.wiki_helper import WikiHelper
-from learning.self_learner import SelfLearner
+from .utils.wiki_helper import WikiHelper
+from .learning.self_learner import SelfLearner
 
 class SimpleMathModel:
     def __init__(self):

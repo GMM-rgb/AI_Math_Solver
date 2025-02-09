@@ -1,13 +1,22 @@
-import wikipedia
+try:
+    import wikipedia
+except ImportError:
+    print("Warning: wikipedia module not found. Please install it using: pip install wikipedia")
+    wikipedia = None
+
 import re
 from typing import Dict, List, Optional
 
 class WikiHelper:
     def __init__(self):
         self.cache: Dict[str, str] = {}
+        self.wikipedia_available = wikipedia is not None
         
     def search_term(self, term: str) -> Optional[str]:
         """Search Wikipedia for a term and return a summary"""
+        if not self.wikipedia_available:
+            return None
+            
         if term in self.cache:
             return self.cache[term]
             

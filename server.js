@@ -21,50 +21,67 @@ app.get('/', (req, res) => {
 // Load training data
 const trainingData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'training_data.json'), 'utf8'));
 
+// Update generateResponse function
+function generateResponse(input, type, data) {
+    const personalities = trainingData.personalities;
+    const friendly = personalities.friendly;
+    
+    const prefix = friendly.prefixes[Math.floor(Math.random() * friendly.prefixes.length)];
+    const suffix = friendly.suffixes[Math.floor(Math.random() * friendly.suffixes.length)];
+    
+    if (type === 'math') {
+        // For math problems, keep the structured JSON format
+        return {
+            format: 'json',
+            problem: {
+                type: 'Math Problem',
+                input: data.input
+            },
+            steps: data.steps,
+            solution: {
+                answer: data.answer,
+                confidence: data.confidence || 95.5
+            }
+        };
+    } else {
+        // For conversations, return plain text with emojis
+        const baseResponses = trainingData.conversations.find(c => 
+            c.variations.some(v => v.includes(input.toLowerCase()))
+        )?.responses || ["I understand, but could you rephrase that?"];
+        
+        const baseResponse = baseResponses[Math.floor(Math.random() * baseResponses.length)];
+        return `${prefix} ${baseResponse} ${suffix}`;
+    }
+}
+
+// Update findBestMatch function
 function findBestMatch(input) {
     input = input.toLowerCase().trim();
     
-    // Check for conversation patterns first
-    for (const conv of trainingData.conversations) {
-        if (conv.variations.includes(input)) {
-            return {
-                type: 'conversation',
-                response: conv.responses[Math.floor(Math.random() * conv.responses.length)]
-            };
-        }
+    // Check for math patterns first
+    const mathPattern = /[\d+\-*/()=x]/;
+    if (mathPattern.test(input)) {
+        // Process as math problem
+        const result = processMathProblem(input);
+        return generateResponse(input, 'math', result);
     }
 
-    // Check for math problems
-    for (const problem of trainingData.math_problems) {
-        if (problem.variations.includes(input) || problem.input === input) {
-            return {
-                format: 'json',
-                problem: {
-                    type: 'Math Problem',
-                    input: problem.input
-                },
-                steps: problem.steps,
-                solution: {
-                    answer: problem.answer,
-                    confidence: 95.5
-                }
-            };
-        }
-    }
-
-    // Try to identify math operators
-    const operators = trainingData.math_patterns.operators;
-    for (const [op, patterns] of Object.entries(operators)) {
-        if (patterns.some(pattern => input.includes(pattern))) {
-            // Process as math problem
-            return processMathProblem(input, op);
-        }
-    }
-
-    return {
-        type: 'conversation',
-        response: "I'm not sure how to solve that problem. Could you rephrase it?"
+    // Generate contextual response for non-math inputs
+    const context = {
+        greeting: /^(hi|hello|hey|good\s*(morning|afternoon|evening))/i,
+        farewell: /^(bye|goodbye|see\s*you|cya)/i,
+        thanks: /^(thanks|thank\s*you|thx)/i,
+        help: /^(help|assist|guide)/i
     };
+
+    for (const [type, pattern] of Object.entries(context)) {
+        if (pattern.test(input)) {
+            return generateResponse(input, 'conversation', { context: type });
+        }
+    }
+
+    // Default response generation
+    return generateResponse(input, 'conversation', { context: 'general' });
 }
 
 function processMathProblem(input, operator) {
@@ -114,81 +131,48 @@ app.post('/wiki/define', async (req, res) => {
     }
 });
 
-// Chat endpoint that communicates with Python
+// Update chat endpoint to use Python chat model
 app.post('/chat', async (req, res) => {
     const message = req.body.message;
-    console.log('Received message:', message);  // Server-side logging
     
     try {
-        // Process message through chat service first
-        const processedMessage = await chatService.processMessage(message);
-        console.log('Processed message:', processedMessage);  // Server-side logging
-        
-        // Only send to Python if it's a math problem
-        if (processedMessage.type === 'math' && processedMessage.confidence > 70) {
-            const pythonPath = process.platform === 'win32' ? 'python' : 'python3';
-            const projectRoot = __dirname;
-            
-            const pythonProcess = spawn(pythonPath, [
-                path.join(projectRoot, 'src', 'chat_model.py'),
-                processedMessage.response
-            ], {
-                env: {
-                    ...process.env,
-                    PYTHONIOENCODING: 'utf-8',
-                    PYTHONUTF8: '1',
-                    LANG: 'C.UTF-8'
+        const pythonProcess = spawn('python3', [
+            path.join(__dirname, 'src', 'chat_model.py'),
+            message
+        ], {
+            env: {
+                ...process.env,
+                PYTHONIOENCODING: 'utf-8',
+                PYTHONUTF8: '1'
+            }
+        });
+
+        let result = '';
+        let errorOutput = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            result += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            errorOutput += data.toString();
+            console.error('Python Error:', data.toString());
+        });
+
+        await new Promise((resolve, reject) => {
+            pythonProcess.on('close', (code) => {
+                if (code !== 0) {
+                    reject(new Error(`Python process failed: ${errorOutput}`));
+                } else {
+                    resolve();
                 }
             });
+        });
 
-            let result = '';
-            let errorOutput = '';
-
-            pythonProcess.stdout.setEncoding('utf8');
-            pythonProcess.stderr.setEncoding('utf8');
-
-            pythonProcess.stdout.on('data', (data) => {
-                result += data.toString();
-                console.log('Python output:', data.toString());  // Server-side logging
-            });
-
-            pythonProcess.stderr.on('data', (data) => {
-                errorOutput += data.toString();
-                console.error('Python error:', data.toString());  // Server-side logging
-            });
-
-            // Use Promise to handle process completion
-            await new Promise((resolve, reject) => {
-                pythonProcess.on('close', (code) => {
-                    if (code !== 0) {
-                        reject(new Error(`Python process exited with code ${code}: ${errorOutput}`));
-                    } else {
-                        resolve();
-                    }
-                });
-                
-                pythonProcess.on('error', (err) => {
-                    reject(new Error(`Failed to start Python process: ${err.message}`));
-                });
-            });
-
-            // Clean up the response
-            result = result.trim();
-            
-            // If it's HTML (math solution), send as-is
-            if (result.startsWith('<')) {
-                res.send(result);
-            } else {
-                // For regular chat messages, send as plain text
-                res.send(result);
-            }
-        } else {
-            // Handle conversation directly through chatService
-            res.send(processedMessage.response);
-        }
+        res.send(result.trim());
     } catch (error) {
-        console.error('Server error:', error);  // Server-side logging
-        res.status(500).send('Error processing request');
+        console.error('Server error:', error);
+        res.status(500).send("😅 Oops! Had a little trouble there. Could you try again?");
     }
 });
 

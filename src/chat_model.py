@@ -110,41 +110,46 @@ class SimpleMathModel:
     def solve_system_of_equations(self, equations):
         """Solve a system of linear equations"""
         try:
-            from sympy import solve, simplify
+            from sympy import symbols, solve, simplify
             from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+            
+            x, y = symbols('x y')
             transformations = standard_transformations + (implicit_multiplication_application,)
             
-            parsed_eqs = []
+            system = []
             for eq in equations:
-                lhs, rhs = [side.strip() for side in eq.split('=')]
-                eq_standardized = parse_expr(lhs, transformations=transformations) - parse_expr(rhs, transformations=transformations)
-                parsed_eqs.append(eq_standardized)
+                if '=' in eq:
+                    left, right = eq.split('=')
+                    expr = parse_expr(left, transformations=transformations) - parse_expr(right, transformations=transformations)
+                    system.append(expr)
             
-            solution = solve(parsed_eqs, [self.x, self.y])
+            solution = solve(system, [x, y])
             
-            if not solution:
-                return "No solution exists"
-            
-            # Format the solution
+            # Clean and format the solution
+            def format_value(val):
+                try:
+                    # Try to simplify and clean up the expression
+                    simplified = simplify(val)
+                    # Convert to a nicer string representation
+                    result = str(simplified).replace('**', '^').replace('sqrt', '√')
+                    # Remove unnecessary parentheses and spaces
+                    result = result.replace('*(', '(').replace('+ -', '- ')
+                    return result
+                except:
+                    return str(val)
+
             if isinstance(solution, dict):
-                formatted = []
-                for var, val in solution.items():
-                    # Simplify the expression before converting to string
-                    simple_val = simplify(val)
-                    formatted.append(f"{var} = {simple_val}")
-                return ", ".join(formatted)
+                return ", ".join(f"{var} = {format_value(val)}" for var, val in solution.items())
             elif isinstance(solution, list):
-                # Handle multiple solutions
-                formatted_solutions = []
+                formatted = []
                 for sol in solution:
                     if isinstance(sol, tuple):
-                        # Format each x,y pair
-                        x_val = simplify(sol[0])
-                        y_val = simplify(sol[1])
-                        formatted_solutions.append(f"x = {x_val}, y = {y_val}")
-                return " or ".join(formatted_solutions)
+                        x_val = format_value(sol[0])
+                        y_val = format_value(sol[1])
+                        formatted.append(f"x = {x_val}, y = {y_val}")
+                return " or ".join(formatted)
             
-            return str(simplify(solution))
+            return format_value(solution)
             
         except Exception as e:
             return f"Error solving system: {str(e)}"
@@ -392,6 +397,11 @@ class ChatBot:
             {''.join(f'<li class="step-item" style="--index: {i+1}">{step}</li>' for i, step in enumerate(result["steps"]))}
         </ul>
     </div>
+    <div class="feedback">
+        <button onclick="handleFeedback(true)" class="feedback-btn positive">
+            <span class="emoji">👍</span> Helpful
+        </button>
+    </div>
 </div>"""
 
                     # Update the styles section with better animations
@@ -430,7 +440,53 @@ class ChatBot:
     .step-item:hover {{
         background-color: rgba(33, 150, 243, 0.05);
     }}
+    .feedback {{
+        margin-top: 15px;
+        text-align: right;
+    }}
+    .feedback-btn {{
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }}
+    .feedback-btn:hover {{
+        background: #f0f0f0;
+    }}
+    .feedback-btn.positive {{
+        color: #4CAF50;
+    }}
+    .feedback-btn .emoji {{
+        font-size: 1.2em;
+    }}
 </style>
+<script>
+function handleFeedback(isPositive) {{
+    if (isPositive) {{
+        const btn = event.target.closest('.feedback-btn');
+        btn.style.background = '#4CAF50';
+        btn.style.color = '#fff';
+        btn.innerHTML = '<span class="emoji">✨</span> Thanks!';
+        btn.disabled = true;
+        
+        // Send feedback to server
+        fetch('/feedback', {{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ 
+                positive: true,
+                solution: "{result['answer'] if 'answer' in result else result.get('decimal')}",
+                equations: "{math_problem}"
+            }})
+        }});
+    }}
+}}
+</script>
 {math_solution}"""
 
                 return self.add_personality(
@@ -487,9 +543,16 @@ class ChatBot:
             <div class="result">{result}</div>
         </div>
     </div>
+    <div class="feedback">
+        <button onclick="handleFeedback(true)" class="feedback-btn positive">
+            <span class="emoji">👍</span> Helpful
+        </button>
+    </div>
 </div>
 <style>
     .math-solution {{
+        visibility: visible !important;
+        opacity: 1 !important;
         background-color: #f8f9fa;
         border: 1px solid #e9ecef;
         border-radius: 8px;
@@ -499,16 +562,49 @@ class ChatBot:
         font-family: 'Arial', sans-serif;
     }}
     .math-solution * {{
-        opacity: 1;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }}
+    .feedback {{
+        margin-top: 15px;
+        text-align: right;
+    }}
+    .feedback-btn {{
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }}
+    .feedback-btn:hover {{
+        background: #f0f0f0;
+    }}
+    .feedback-btn.positive {{
+        color: #4CAF50;
+    }}
+    .feedback-btn .emoji {{
+        font-size: 1.2em;
     }}
     .equation, .step {{
-        animation: smoothFade 0.4s ease-out;
+        display: block;
+        opacity: 1 !important;
+        transform: none;
+        animation: gentleFade 0.5s ease-out;
         animation-delay: calc(var(--index) * 0.1s);
-        opacity: 1;
     }}
-    @keyframes smoothFade {{
-        from {{ opacity: 0.7; transform: translateY(-5px); }}
-        to {{ opacity: 1; transform: translateY(0); }}
+    @keyframes gentleFade {{
+        from {{ 
+            opacity: 0.9 !important;
+            transform: translateY(-2px);
+        }}
+        to {{ 
+            opacity: 1 !important;
+            transform: translateY(0);
+        }}
     }}
     .math-solution h3 {{
         color: #2196F3;
@@ -567,7 +663,29 @@ class ChatBot:
         50% {{ background-color: rgba(40, 167, 69, 0.05); }}
         100% {{ background-color: white; }}
     }}
-</style>"""
+</style>
+<script>
+function handleFeedback(isPositive) {{
+    if (isPositive) {{
+        const btn = event.target.closest('.feedback-btn');
+        btn.style.background = '#4CAF50';
+        btn.style.color = '#fff';
+        btn.innerHTML = '<span class="emoji">✨</span> Thanks!';
+        btn.disabled = true;
+        
+        // Send feedback to server
+        fetch('/feedback', {{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ 
+                positive: true,
+                solution: "{result}",
+                equations: {equations}
+            }})
+        }});
+    }}
+}}
+</script>"""
 
     def handle_greeting(self, message):
         hour = datetime.now().hour

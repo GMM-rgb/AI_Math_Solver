@@ -191,6 +191,43 @@ app.post('/chat', async (req, res) => {
     }
 });
 
+// Add feedback endpoint
+app.post('/feedback', async (req, res) => {
+    const { positive, solution, equations } = req.body;
+    
+    if (positive) {
+        try {
+            // Store feedback in training data
+            const feedback = {
+                timestamp: new Date().toISOString(),
+                solution,
+                equations,
+                type: 'positive'
+            };
+            
+            // Read current feedback file or create new one
+            const feedbackPath = path.join(__dirname, 'data', 'feedback.json');
+            let feedbackData = [];
+            
+            try {
+                feedbackData = JSON.parse(fs.readFileSync(feedbackPath, 'utf8'));
+            } catch (e) {
+                // File doesn't exist or is invalid, start fresh
+            }
+            
+            feedbackData.push(feedback);
+            fs.writeFileSync(feedbackPath, JSON.stringify(feedbackData, null, 2));
+            
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Error saving feedback:', error);
+            res.status(500).json({ error: 'Failed to save feedback' });
+        }
+    } else {
+        res.json({ success: true }); // Always return success for negative feedback
+    }
+});
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

@@ -1060,31 +1060,37 @@
             const message = document.createElement('div');
             message.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
 
+            if (!isUser) {
+                document.body.classList.add('scroll-lock');
+                messages.style.overflow = 'hidden';
+            }
+
             if (!isUser && data.format === 'json') {
-                // Math solution display
                 const solution = document.createElement('div');
                 solution.className = 'math-solution';
                 solution.innerHTML = generateMathSolutionHTML(data);
                 message.appendChild(solution);
                 messages.appendChild(message);
-
-                // Smooth scroll with slight delay for animation
-                setTimeout(() => {
-                    messages.scrollTo({
-                        top: messages.scrollHeight,
-                        behavior: 'smooth'
-                    });
-                }, 100);
-
+                
+                // Force scroll during solution display
+                scrollToBottom(true);
+                
                 // Animate confidence after scroll
                 const confidenceElement = solution.querySelector('.confidence-counter');
-                await animateConfidence(confidenceElement, data.solution.confidence);
+                if (confidenceElement) {
+                    await animateConfidence(confidenceElement, data.solution.confidence);
+                }
             } else {
+                message.style.visibility = 'visible';
+                message.style.opacity = '1';
                 await typeMessage(typeof data === 'string' ? data : JSON.stringify(data), message);
                 messages.appendChild(message);
             }
 
-            messages.scrollTop = messages.scrollHeight;
+            // Release scroll lock after typing
+            document.body.classList.remove('scroll-lock');
+            messages.style.overflow = 'auto';
+            scrollToBottom();
         }
 
         function animateConfidence(element, targetConfidence) {
@@ -1387,7 +1393,7 @@
             // Create preview
             const reader = new FileReader();
             reader.onload = async (e) => {
-                const preview = document.createElement('img');
+                const preview = new Image();
                 preview.src = e.target.result;
                 preview.className = 'preview-image';
                 
@@ -1493,6 +1499,18 @@
                 lastMessage.scrollIntoView({
                     behavior: smooth ? 'smooth' : 'auto',
                     block: 'end'
+                });
+            }
+        }
+
+        function scrollToBottom(force = false) {
+            const messages = document.getElementById('chatMessages');
+            if (force) {
+                messages.scrollTop = messages.scrollHeight;
+            } else {
+                messages.scrollTo({
+                    top: messages.scrollHeight,
+                    behavior: 'smooth'
                 });
             }
         }

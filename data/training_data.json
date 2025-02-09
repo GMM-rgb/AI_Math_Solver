@@ -166,7 +166,25 @@
                 "find x and y for -4x + 4y = -8, x - y = -3",
                 "determine the values of x and y in -4x + 4y = -8 and x - y = -3"
             ]
-        }        
+        },
+        {
+            "input": "3x - 2y = 6, 3x + 2y = 12",
+            "answer": "Infinitely many solutions",
+            "steps": [
+                "Add the two equations: 6x = 18",
+                "Divide by 6: x = 3",
+                "Substitute x = 3 into the first equation: 3(3) - 2y = 6",
+                "Solve for y: 9 - 2y = 6",
+                "Subtract 9 from both sides: -2y = -3",
+                "Divide by -2: y = 1.5",
+                "Identify that the result is a line, indicating infinitely many solutions"
+            ],
+            "variations": [
+                "solve for x and y in 3x - 2y = 6 and 3x + 2y = 12",
+                "find the solution to 3x - 2y = 6 and 3x + 2y = 12",
+                "determine x and y for the system 3x - 2y = 6, 3x + 2y = 12"
+            ]
+        }
     ],
     "math_patterns": {
         "what is": ["what's", "whats", "what is", "tell me"],

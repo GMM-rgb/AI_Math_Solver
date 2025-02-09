@@ -103,18 +103,14 @@ def solve_system_of_equations(equations):
                 expr = parse_expr(left, transformations=transformations) - parse_expr(right, transformations=transformations)
                 system.append(expr)
         
-        print(f"Debug: Processing system: {system}")  # Debug line
-        
         # Solve the system
         solution = solve(system, [x, y])
-        print(f"Debug: Solution found: {solution}")  # Debug line
         
         if isinstance(solution, dict):
             return ", ".join(f"{var} = {val}" for var, val in solution.items())
         return str(solution)
         
     except Exception as e:
-        print(f"Debug: Error solving system: {str(e)}")  # Debug line
         return f"Error solving system: {str(e)}"
 
 def extract_math_problem(message):

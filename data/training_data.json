@@ -117,6 +117,25 @@
                 "solve the system 4x + y = 10 and 2x - 3y = -2",
                 "determine x and y for 4x + y = 10, 2x - 3y = -2"
             ]
+        },
+        {
+            "input": "5x - 2y = 15, 3x + 4y = 20",
+            "answer": "x = 5, y = 5",
+            "steps": [
+                "Solve for y in the first equation: y = (5x - 15) / 2",
+                "Substitute y in the second equation: 3x + 4((5x - 15) / 2) = 20",
+                "Expand: 3x + 10x - 30 = 20",
+                "Combine like terms: 13x - 30 = 20",
+                "Add 30 to both sides: 13x = 50",
+                "Divide by 13: x = 5",
+                "Substitute x = 5 into y = (5x - 15) / 2",
+                "Solve for y: y = 5"
+            ],
+            "variations": [
+                "solve for x and y in 5x - 2y = 15 and 3x + 4y = 20",
+                "find the solution to 5x - 2y = 15 and 3x + 4y = 20",
+                "determine x and y for the system 5x - 2y = 15, 3x + 4y = 20"
+            ]
         }
     ],
     "math_patterns": {

@@ -453,16 +453,70 @@ class ChatBot:
     def _format_system_solution(self, equations, result):
         """Format the system of equations solution with HTML"""
         return f"""
-<div style="background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;">
-    <div class="math-text" style="font-size: 18px; color: #333;">
-        System of Equations:<br>
-        {'<br>'.join(equations)}
+<div class="math-solution">
+    <div class="math-problem">
+        <h3>System of Equations:</h3>
+        <div class="equations">
+            {'<br>'.join(f'<div class="equation">{eq}</div>' for eq in equations)}
+        </div>
     </div>
-    <div class="divider" style="margin: 10px 0;"></div>
-    <div class="fade-in" style="color: #2196F3; font-size: 20px;">
-        Solution: {result}
+    <div class="solution">
+        <h3>Solution:</h3>
+        <div class="result">{result}</div>
     </div>
-</div>"""
+</div>
+<style>
+    .math-solution {{
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-family: 'Arial', sans-serif;
+    }}
+    .math-solution h3 {{
+        color: #2196F3;
+        margin: 0 0 10px 0;
+        font-size: 1.2em;
+        animation: fadeIn 0.5s ease-out;
+    }}
+    .equations {{
+        margin: 10px 0;
+        padding: 10px;
+        background-color: white;
+        border-radius: 4px;
+    }}
+    .equation {{
+        font-family: 'Consolas', monospace;
+        font-size: 1.1em;
+        margin: 5px 0;
+        color: #333;
+        animation: slideIn 0.5s ease-out;
+    }}
+    .solution {{
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }}
+    .result {{
+        font-size: 1.2em;
+        color: #28a745;
+        font-weight: bold;
+        padding: 10px;
+        background-color: white;
+        border-radius: 4px;
+        animation: fadeIn 0.8s ease-out;
+    }}
+    @keyframes fadeIn {{
+        from {{ opacity: 0; }}
+        to {{ opacity: 1; }}
+    }}
+    @keyframes slideIn {{
+        from {{ transform: translateX(-20px); opacity: 0; }}
+        to {{ transform: translateX(0); opacity: 1; }}
+    }}
+</style>"""
 
     def handle_greeting(self, message):
         hour = datetime.now().hour

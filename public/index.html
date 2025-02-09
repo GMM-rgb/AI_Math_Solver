@@ -270,6 +270,15 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .footer-text {
+            text-align: center;
+            font-size: 1.45em;
+            color: #333;
+            -webkit-text-stroke: 1px #004f9e;
+            -webkit-text-fill-color: #2196F3;
+            font-weight: bold;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script src="js/tf_model.js"></script>
@@ -787,9 +796,9 @@
                 </div>
             </div>
         </div>
-        <footer>
-            <p>Powered by <a>HtWebz Assistant</a></p>
-        </footer>
     </div>
-</body>
+        <footer>
+            <p class="footer-text">Powered by <a href="about:blank">HtWebz Assistant</a> - & Created by Maximus Farvour</p>
+        </footer>
+    </body>
 </html>

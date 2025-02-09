@@ -5,7 +5,6 @@ import random
 import json
 from pathlib import Path
 from fractions import Fraction
-import sympy
 from sympy.solvers import solve
 from sympy.parsing.sympy_parser import parse_expr
 
@@ -203,16 +202,19 @@ class ChatBot:
         return None
 
     def add_personality(self, message, mood='happy'):
-        """Add personality to responses with emojis and natural language"""
-        emoji = random.choice(self.emojis.get(mood, ['😊']))
-        phrases = [
-            f"{emoji} {message}",
-            f"{message} {emoji}",
-            f"Hmm, let me think... {message} {emoji}",
-            f"Oh! {message} {emoji}",
-            f"I think {message} {emoji}"
-        ]
-        return random.choice(phrases)
+        """Add personality to responses with ASCII-safe emoticons"""
+        try:
+            emoji = random.choice(self.emojis.get(mood, [':)']))
+            phrases = [
+                f"{emoji} {message}",
+                f"{message} {emoji}",
+                f"Hmm... {message} {emoji}",
+                f"Oh! {message} {emoji}",
+                f"I think {message} {emoji}"
+            ]
+            return random.choice(phrases)
+        except UnicodeEncodeError:
+            return message
 
     def handle_math(self, message):
         math_problem = self.extract_math_problem(message)
@@ -220,14 +222,25 @@ class ChatBot:
             try:
                 result = self.math_model.solve(math_problem)
                 if "error" not in result:
-                    return json.dumps({
-                        "format": "json",
-                        "problem": {
-                            "input": math_problem,
-                            "type": self._identify_problem_type(math_problem)  # Using self here
-                        },
-                        "solution": result
-                    })
+                    # Create a nice HTML formatted output
+                    html_output = f"""
+<div style="background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;">
+    <div style="font-size: 18px; color: #333;">Problem: {math_problem}</div>
+    <div style="border-bottom: 1px solid #ddd; margin: 10px 0;"></div>
+    <div style="color: #2196F3; font-size: 20px;">
+        Answer: {result['answer'] if 'answer' in result else result.get('decimal')}
+    </div>
+    {f'<div style="color: #666; margin-top: 5px;">Fraction: {result["fraction"]}</div>' if 'fraction' in result else ''}
+    <div style="margin-top: 10px; color: #666;">
+        <div>Steps:</div>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+            {''.join(f'<li>{step}</li>' for step in result["steps"])}
+        </ul>
+    </div>
+</div>
+"""
+                    return html_output
+
                 return self.add_personality(
                     f"Sorry, I couldn't solve that: {result['error']}", 
                     'error'
@@ -296,10 +309,30 @@ class ChatBot:
 
 if __name__ == "__main__":
     import sys
+    import io
+
+    # Force UTF-8 encoding for Windows console
+    if sys.platform.startswith('win'):
+        try:
+            import subprocess
+            subprocess.run(['chcp', '65001'], shell=True, check=True)
+        except:
+            pass
+    
+    # Set up UTF-8 output
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace') if hasattr(sys.stdout, 'reconfigure') else None
+
     if len(sys.argv) < 2:
         print("No message provided.", file=sys.stderr)
         sys.exit(1)
     
-    chatbot = ChatBot()
-    response = chatbot.get_response(sys.argv[1])
-    print(response)
+    try:
+        chatbot = ChatBot()
+        response = chatbot.get_response(sys.argv[1])
+        # Don't encode/decode if it's HTML output
+        if response.strip().startswith('<div'):
+            print(response)
+        else:
+            print(response.encode('utf-8', errors='replace').decode('utf-8'))
+    except Exception as e:
+        print(f"Error: {str(e)}", file=sys.stderr)

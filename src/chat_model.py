@@ -344,10 +344,9 @@ class ChatBot:
         self.notes_cache = {}
         self.local_notes_dir = os.path.join(self.data_dir, 'math_notes')
 
-    async def _get_math_notes(self, topic):
+    def _get_math_notes(self, topic):  # Remove 'async'
         """Fetch relevant math notes for the topic"""
         try:
-            # Check cache first
             if topic in self.notes_cache:
                 return self.notes_cache[topic]
 
@@ -357,11 +356,12 @@ class ChatBot:
                 self.notes_cache[topic] = local_notes
                 return local_notes
 
-            # Fetch from online source
+            # Try to load from file
             notes_file = os.path.join(self.local_notes_dir, f"{topic.lower()}.json")
             if os.path.exists(notes_file):
                 with open(notes_file, 'r') as f:
                     notes = json.load(f)
+                    self.notes_cache[topic] = notes
                     return notes
 
             return None
@@ -380,15 +380,15 @@ class ChatBot:
             print(f"Error reading local notes: {e}", file=sys.stderr)
         return None
 
-    def solve_with_notes(self, problem, topic):
+    def solve_with_notes(self, problem, topic):  # Remove 'async'
         """Solve problem with help from notes"""
-        notes = self._get_math_notes(topic)
+        notes = self._get_math_notes(topic)  # Remove 'await'
         if notes:
             # Add notes to solution steps
             result = self.math_model.solve(problem)
             if "steps" in result:
-                result["steps"].insert(1, f"Using {topic} formula: {notes.get('formula', '')}")
-                result["steps"].insert(2, f"Related example: {notes.get('example', '')}")
+                result["steps"].insert(1, f"Using {topic} formula: {notes.get('formulas', {}).get(topic, '')}")
+                result["steps"].insert(2, f"Related example: {notes.get('examples', {}).get(topic, '')}")
             return result
         return self.math_model.solve(problem)
 
@@ -587,8 +587,8 @@ function handleFeedback(isPositive) {{
 
     def get_response(self, message):
         try:
+            # Handle thank you messages
             if message.lower() in ['thank you', 'thanks', 'thx', 'ty']:
-                # Handle thank you messages directly
                 return self.add_personality(
                     random.choice([
                         "You're welcome! Let me know if you need more help!",
@@ -599,21 +599,32 @@ function handleFeedback(isPositive) {{
                     ['success']
                 )
 
-            # Look for other conversation matches
+            # Check for math problem first (prioritize math handling)
+            math_problem = self.extract_math_problem(message)
+            if math_problem:
+                return self.handle_math(message)
+
+            # Look for conversation matches if not a math problem
             if self.training_data and 'conversations' in self.training_data:
                 for conv in self.training_data.get('conversations', []):
-                    if any(v.lower() == message.lower() for v in conv.get('variations', [])):
+                    if message.lower() in [v.lower() for v in conv.get('variations', [])]:
                         response = random.choice(conv['responses'])
                         prefix = random.choice(self.training_data['personalities']['friendly']['prefixes'])
                         suffix = random.choice(self.training_data['personalities']['friendly']['suffixes'])
                         return f"{prefix} {response} {suffix}"
 
-            # If no conversation match, try math problem
+            # If no match found, try math as fallback
             return self.handle_math(message)
 
         except Exception as e:
             print(f"Error in get_response: {e}", file=sys.stderr)
-            return "😅 Oops! I had trouble with that. Could you try again?"
+            import traceback
+            print(traceback.format_exc(), file=sys.stderr)  # Add detailed error trace
+            return self.add_personality(
+                "I had trouble solving that problem. Could you check the format and try again?",
+                'error',
+                ['think', 'math']
+            )
 
     def _identify_math_topic(self, problem):
         """Identify the mathematical topic of the problem"""
@@ -629,6 +640,73 @@ function handleFeedback(isPositive) {{
             if re.search(pattern, problem, re.IGNORECASE):
                 return topic
         return 'basic_math'
+
+    def add_personality(self, message, mood='happy', context=None):
+        """Add emoji and personality to responses"""
+        try:
+            emoji_set = set()
+            # Add mood emoji
+            emoji_set.add(random.choice(self.emojis.get(mood, ['😊'])))
+            
+            # Add context emojis
+            if context:
+                if isinstance(context, list):
+                    for ctx in context:
+                        if ctx in self.emojis:
+                            emoji_set.add(random.choice(self.emojis[ctx]))
+                elif context in self.emojis:
+                    emoji_set.add(random.choice(self.emojis[context]))
+            
+            emojis = list(emoji_set)
+            prefix = ' '.join(emojis[:2])
+            suffix = ' ' + random.choice(emojis) if len(emojis) > 2 else ''
+            
+            return f"{prefix} {message}{suffix}"
+        except Exception as e:
+            print(f"Error adding personality: {e}", file=sys.stderr)
+            return message
+
+    def extract_math_problem(self, message):
+        """Extract math problem from message"""
+        try:
+            # Clean and normalize message
+            clean_msg = message.lower().strip()
+            
+            # Check for system of equations
+            if ('system' in clean_msg or ',' in clean_msg) and '=' in clean_msg:
+                equations = []
+                for eq in re.split('[,\n]', clean_msg):
+                    eq = eq.strip()
+                    if '=' in eq:
+                        match = re.search(r'([0-9]*[xy][^=]*=[^,\n]+)', eq)
+                        if match:
+                            equations.append(match.group(1).strip())
+                if len(equations) > 1:
+                    return '\n'.join(equations)
+            
+            # Remove common words
+            words_to_remove = ['solve', 'calculate', 'what is', 'evaluate', 'compute']
+            for word in words_to_remove:
+                clean_msg = clean_msg.replace(word, '')
+            
+            # Clean unwanted characters
+            clean_msg = re.sub(r'[^\w\s+\-*/()=.,]', '', clean_msg)
+            
+            # Try to match algebraic equation
+            if 'x' in clean_msg or '=' in clean_msg:
+                match = re.search(r'([0-9x]+\s*[+\-*/]?\s*[0-9x]*\s*=\s*[0-9x]+)', clean_msg)
+                if match:
+                    return match.group(1).strip()
+            
+            # Try to match arithmetic expression
+            match = re.search(r'(\d+\s*[+\-*/]\s*\d+)', clean_msg)
+            if match:
+                return match.group(1).strip()
+            
+            return None
+        except Exception as e:
+            print(f"Error extracting math problem: {e}", file=sys.stderr)
+            return None
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# TensorFlow
+*.dylib
+*.so
+*.dll
+*.pb
+
+# Large files
+*.model
+model/
+*.ckpt
+*.h5
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+*.pyc
+__pycache__/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+temp/
+*.tmp

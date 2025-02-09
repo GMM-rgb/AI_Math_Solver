@@ -1,0 +1,222 @@
+{
+    "math_problems": [
+        {
+            "input": "2 + 2",
+            "answer": 4,
+            "steps": ["Added 2 and 2"],
+            "variations": ["what is 2 plus 2", "2 plus 2", "sum of 2 and 2"]
+        },
+        {
+            "input": "5 - 3",
+            "answer": 2,
+            "steps": ["Subtracted 3 from 5"],
+            "variations": ["what is 5 minus 3", "5 minus 3", "difference of 5 and 3"]
+        },
+        {
+            "input": "4 * 6",
+            "answer": 24,
+            "steps": ["Multiplied 4 by 6"],
+            "variations": ["what is 4 times 6", "4 times 6", "product of 4 and 6"]
+        },
+        {
+            "input": "2x + 3 = 7",
+            "answer": "x = 2",
+            "steps": ["Subtract 3 from both sides", "Divide both sides by 2"],
+            "variations": ["solve for x in 2x + 3 = 7", "what is x when 2x + 3 = 7"]
+        },
+        {
+            "input": "x^2 - 4 = 0",
+            "answer": "x = [-2, 2]",
+            "steps": ["Add 4 to both sides", "Take square root of both sides"],
+            "variations": ["solve x squared minus 4", "find x in x^2 = 4"]
+        },
+        {
+            "input": "4x - 7 = 5",
+            "answer": "x = 3",
+            "steps": [
+                "Add 7 to both sides",
+                "Divide both sides by 4"
+            ],
+            "variations": [
+                "solve for x in 4x - 7 = 5",
+                "what is x when 4x - 7 = 5",
+                "solution for 4x - 7 = 5"
+            ]
+        },
+        {
+            "input": "-3 + 2",
+            "answer": -1,
+            "steps": ["Add -3 and 2"],
+            "variations": ["what is -3 plus 2", "-3 plus 2", "sum of -3 and 2"] 
+        },
+        {
+            "input": "-4 - 5",
+            "answer": -9,
+            "steps": ["Subtract 5 from -4"],
+            "variations": ["what is -4 minus 5", "-4 minus 5", "difference of -4 and 5"]
+        },
+        {
+            "input": "-3 * -2",
+            "answer": 6,
+            "steps": ["Multiply -3 by -2"],
+            "variations": ["what is -3 times -2", "-3 times -2", "product of -3 and -2"]
+        }                
+    ],
+    "math_patterns": {
+        "what is": ["what's", "whats", "what is", "tell me"],
+        "operators": {
+            "plus": ["+", "add", "sum", "plus"],
+            "minus": ["-", "subtract", "difference", "minus", "take away"],
+            "times": ["*", "multiply", "times", "multiplied by"],
+            "divide": ["/", "divide", "divided by", "over"]
+        }
+    },
+    "personalities": {
+        "friendly": {
+            "prefixes": ["Hey!", "Oh!", "Hmm...", "Let's see..."],
+            "suffixes": ["😊", "✨", "💫"],
+            "fillers": ["Well,", "You know,", "I think", "Actually,"]
+        },
+        "professional": {
+            "prefixes": ["Alright,", "Let me help you with that.", "I understand."],
+            "suffixes": ["📝", "✅", "💡"],
+            "fillers": ["Specifically,", "In other words,", "To clarify,"]
+        }
+    },
+    "conversations": [
+        {
+            "input": "hello",
+            "responses": [
+                "Hi there! Ready to solve some math?",
+                "Hello! How can I help you with math today?",
+                "Greetings! Let's tackle some mathematics!"
+            ],
+            "variations": ["hi",
+             "hey",
+              "good morning",
+               "good afternoon",
+                "good evening",
+                 "yo",
+                  "what's up",
+                   "howdy",
+                    "hola",
+                     "hi there",
+                      "hello there",
+                       "hey there",
+                        "hiya",
+                         "howdy do",
+                          "howdy there",
+                           "how are you",
+                            "how's it going",
+                             "what's new",
+                              "what's up",
+                               "how's everything",
+                                "how's life",
+                                 "how's your day",
+                                  "how's your day going",
+                                   "how's your day been",
+                                    "how's your day going so far",
+                                     "how's your day been so far",
+                                      "how's your day going on",
+                                       "how's your day been going on",
+                                        "how's your day going on so far",
+                                         "how's your day been going on so far",
+                                          "how's your day going on so far today",
+                                           "how's your day been going on so far today",
+                                            "how's your day going on so far today?",
+                                             "how's your day been going on so far today?",
+                                              "how's your day going on so far today?!",
+                                               "how's your day been going on so far today?!",
+                                                "how's your day going on so far today?!!",
+                                                 "how's your day been going on so far today?!!"]
+        },
+        {
+            "input": "search",
+            "responses": [
+                "For complex searches and research, please check with my cousin HtWebz Assistant. I'm best at solving math problems!",
+                "I'm your math buddy! For web searches, try HtWebz Assistant instead.",
+                "While I focus on math, my cousin HtWebz Assistant can help you with complex searches."
+            ],
+            "variations": [
+                "can you search",
+                "look this up",
+                "find information about",
+                "research this topic",
+                "complex question",
+                "web search"
+            ]
+        },
+        {
+            "input": "sorry",
+            "responses": [
+                "No worries at all! We can try again with your math problem.",
+                "That's okay! I'm here to help. What would you like to calculate?",
+                "Don't worry about it! Math can be tricky sometimes. Let's try again."
+            ],
+            "variations": [
+                "my bad", "oops", "apologize", "apologies",
+                "didn't mean to", "wrong problem", "mistake"
+            ]
+        },
+        {
+            "input": "thanks",
+            "responses": [
+                "You're welcome! Let me know if you need help with more math problems!",
+                "Happy to help! What else would you like to calculate?",
+                "Anytime! Feel free to ask me any math questions!"
+            ],
+            "variations": [
+                "thank you", "thx", "appreciate it", "ty", "okay thanks",
+                "that helps", "helpful", "great help", "ok thanks"
+            ]
+        },
+        {
+            "input": "confused",
+            "responses": [
+                "Let me try to explain this more clearly. What part is confusing?",
+                "Math can be tricky! Would you like me to break down the steps?",
+                "I'll do my best to explain it better. What's giving you trouble?"
+            ],
+            "variations": [
+                "don't understand", "not clear", "what do you mean",
+                "unclear", "makes no sense", "explain better"
+            ]
+        },
+        {
+            "input": "how are you",
+            "responses": [
+                "I'm doing great! Ready to help you with some math problems.",
+                "I'm excellent and ready to solve math with you!",
+                "All systems running perfectly! What math can I help you with?"
+            ],
+            "variations": [
+                "how r u", "how're you", "how are you doing", "how are you", "how you doing",
+                "how do you feel", "are you ok", "you good", "how are you?", "how are you doing?", "how do you feel?", "are you ok?", "you good?"
+            ]
+        },
+        {
+            "input": "bye",
+            "responses": [
+                "Goodbye! Come back anytime for more math help!",
+                "See you later! Don't forget to practice your math!",
+                "Farewell! I'll be here when you need more math assistance!"
+            ],
+            "variations": [
+                "goodbye", "see you", "cya", "gtg", "got to go",
+                "leaving", "talk later", "bye bye"
+            ]
+        },
+        {
+            "input": "follow up",
+            "responses": [
+                "Would you like to try solving a math problem now?",
+                "I'm ready to help with any calculations you need.",
+                "Feel free to type in a math problem for me to solve!"
+            ],
+            "variations": [
+                "ok", "okay", "alright", "sure", "yes",
+                "understood", "got it", "i see"
+            ]
+        }
+    ]
+}

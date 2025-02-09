@@ -1,0 +1,7 @@
+sympy>=1.12
+numpy>=1.21.0
+pillow>=9.0.0
+pytesseract>=0.3.8
+tensorflow>=2.9.0
+scikit-learn>=1.0.0
+pyautogui>=0.9.53

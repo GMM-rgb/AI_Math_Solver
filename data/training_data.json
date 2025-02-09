@@ -184,6 +184,25 @@
                 "find the solution to 3x - 2y = 6 and 3x + 2y = 12",
                 "determine x and y for the system 3x - 2y = 6, 3x + 2y = 12"
             ]
+        },
+        {
+            "input": "2x + 3y = 12, x - y = 2",
+            "answer": "x = 3.6, y = 1.6",
+            "steps": [
+                "Solve for x in the second equation: x = y + 2",
+                "Substitute x in the first equation: 2(y + 2) + 3y = 12",
+                "Expand: 2y + 4 + 3y = 12",
+                "Combine like terms: 5y + 4 = 12",
+                "Subtract 4 from both sides: 5y = 8",
+                "Divide by 5: y = 1.6",
+                "Substitute y = 1.6 into x = y + 2",
+                "Solve for x: x = 3.6"
+            ],
+            "variations": [
+                "solve the system 2x + 3y = 12 and x - y = 2",
+                "find x and y for 2x + 3y = 12, x - y = 2",
+                "determine the values of x and y in 2x + 3y = 12 and x - y = 2"
+            ]
         }
     ],
     "math_patterns": {

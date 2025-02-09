@@ -341,140 +341,65 @@ class ChatBot:
         self.math_model = SimpleMathModel()
         self.wiki_helper = WikiHelper()
         self.self_learner = SelfLearner()
+        self.notes_cache = {}
+        self.local_notes_dir = os.path.join(self.data_dir, 'math_notes')
 
-    def _load_text_patterns(self):
+    async def _get_math_notes(self, topic):
+        """Fetch relevant math notes for the topic"""
         try:
-            with open(os.path.join(self.data_dir, 'text_patterns.json'), 'r') as f:
-                return json.load(f)
-        except:
-            return {}
+            # Check cache first
+            if topic in self.notes_cache:
+                return self.notes_cache[topic]
 
-    def _identify_problem_type(self, problem):
-        """Identify the type of math problem"""
-        if '+' in problem: return "Addition"
-        if '-' in problem: return "Subtraction"
-        if '*' in problem: return "Multiplication"
-        if '/' in problem: return "Division"
-        return "Unknown"
+            # Check local notes
+            local_notes = self._get_local_notes(topic)
+            if local_notes:
+                self.notes_cache[topic] = local_notes
+                return local_notes
 
-    def extract_math_problem(self, message):
-        """Extract math problem from natural language question"""
-        # First normalize any mathematical symbols
-        for standard, variations in MATH_SYMBOLS.items():
-            for variant in variations:
-                message = message.replace(variant, standard)
-        
-        clean_msg = message.lower()
-        
-        # Improved system of equations detection
-        if any(word in clean_msg for word in ['system', 'equations']) or (',' in clean_msg and '=' in clean_msg):
-            # Remove common words that might interfere
-            clean_msg = clean_msg.replace('solve', '').replace('the', '').replace('system', '').replace('of', '').replace('equations', '')
-            
-            # Split by comma or newline and clean each equation
-            equations = []
-            for eq in re.split('[,\n]', clean_msg):
-                # Enhanced equation pattern matching
-                eq = eq.strip()
-                if '=' in eq:
-                    # Match pattern like "2x + 3y = 12" or "x - y = 4"
-                    match = re.search(r'([0-9]*[xy][^=]*=[^,\n]+)', eq)
-                    if match:
-                        equations.append(match.group(1).strip())
-            
-            if len(equations) > 1:
-                return '\n'.join(equations)
-        
-        # Continue with existing single equation/expression extraction
-        # Remove common phrases and unwanted punctuation
-        clean_msg = message.lower()
-        
-        # Remove text like "python" and other unwanted words
-        words_to_remove = ['python', 'solve', 'calculate', 'what is', 'evaluate', 'compute']
-        for word in words_to_remove:
-            clean_msg = clean_msg.replace(word, '')
-        
-        # Clean unwanted characters
-        clean_msg = clean_msg.translate(str.maketrans('', '', '\'"`;#'))
-        clean_msg = clean_msg.replace('?', '').replace('please', '').strip()
-        
-        # Convert word operators to symbols
-        clean_msg = (clean_msg.replace('plus', '+')
-                             .replace('minus', '-')
-                             .replace('times', '*')
-                             .replace('multiplied by', '*')
-                             .replace('divided by', '/')
-                             .replace('over', '/'))
-        
-        # Try to match algebraic equation first (with better pattern)
-        algebraic_match = re.search(r'([0-9x]+\s*[\+\-\*\/]?\s*[0-9x]*\s*=\s*[0-9x]+)', clean_msg)
-        if (algebraic_match and ('x' in clean_msg or '=' in clean_msg)):
-            return algebraic_match.group(1).strip()
-            
-        # Then try arithmetic (with better pattern)
-        arithmetic_match = re.search(r'(\d+\s*[\+\-\*\/]\s*\d+)', clean_msg)
-        if arithmetic_match:
-            return arithmetic_match.group(1).strip()
-            
+            # Fetch from online source
+            notes_file = os.path.join(self.local_notes_dir, f"{topic.lower()}.json")
+            if os.path.exists(notes_file):
+                with open(notes_file, 'r') as f:
+                    notes = json.load(f)
+                    return notes
+
+            return None
+        except Exception as e:
+            print(f"Error fetching math notes: {e}", file=sys.stderr)
+            return None
+
+    def _get_local_notes(self, topic):
+        """Get notes from local model"""
+        try:
+            notes_file = os.path.join(self.local_notes_dir, f"{topic.lower()}.json")
+            if os.path.exists(notes_file):
+                with open(notes_file, 'r') as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"Error reading local notes: {e}", file=sys.stderr)
         return None
 
-    def get_contextual_emojis(self, message, mood='happy', context=None):
-        """Get multiple emojis based on message context"""
-        emoji_set = set()
-        
-        # Always include one mood emoji
-        emoji_set.add(random.choice(self.emojis.get(mood, ['😊'])))
-        
-        # Add context-specific emojis
-        if context:
-            if isinstance(context, list):
-                for ctx in context:
-                    if ctx in self.emojis:
-                        emoji_set.add(random.choice(self.emojis[ctx]))
-            elif context in self.emojis:
-                emoji_set.add(random.choice(self.emojis[context]))
-        
-        # Add contextual emojis based on message content
-        if 'calculate' in message.lower() or any(op in message for op in ['+', '-', '*', '/']):
-            emoji_set.add(random.choice(self.emojis['calculate']))
-        if 'help' in message.lower() or '?' in message:
-            emoji_set.add(random.choice(self.emojis['help']))
-        if 'smart' in message.lower() or 'clever' in message.lower():
-            emoji_set.add(random.choice(self.emojis['smart']))
-        
-        return list(emoji_set)
+    def solve_with_notes(self, problem, topic):
+        """Solve problem with help from notes"""
+        notes = self._get_math_notes(topic)
+        if notes:
+            # Add notes to solution steps
+            result = self.math_model.solve(problem)
+            if "steps" in result:
+                result["steps"].insert(1, f"Using {topic} formula: {notes.get('formula', '')}")
+                result["steps"].insert(2, f"Related example: {notes.get('example', '')}")
+            return result
+        return self.math_model.solve(problem)
 
-    def add_personality(self, message, mood='happy', context=None):
-        """Add personality to responses with multiple emojis"""
-        try:
-            emojis = self.get_contextual_emojis(message, mood, context)
-            emoji_prefix = ' '.join(emojis[:2])  # Use up to 2 emojis at start
-            emoji_suffix = ' ' + random.choice(emojis) if len(emojis) > 2 else ''
-            
-            phrases = [
-                f"{emoji_prefix} {message}{emoji_suffix}",
-                f"{message} {' '.join(emojis)}",
-                f"{emoji_prefix}... {message}{emoji_suffix}",
-                f"Oh! {emoji_prefix} {message}{emoji_suffix}",
-            ]
-            return random.choice(phrases)
-        except UnicodeEncodeError:
-            return message
-
-    def handle_math(self, message):
+    def handle_math(self, message):  # Remove 'async' here
         math_problem = self.extract_math_problem(message)
         
         if math_problem:
             try:
-                # Improved system of equations handling
-                if ',' in message or '\n' in math_problem:
-                    equations = [eq.strip() for eq in math_problem.split('\n') if eq.strip()]
-                    if len(equations) > 1:
-                        result = self.math_model.solve_system_of_equations(equations)
-                        return self._format_system_solution(equations, result)
-                
-                # Continue with existing single equation/expression handling
-                result = self.math_model.solve(math_problem)
+                # Identify topic from problem
+                topic = self._identify_math_topic(math_problem)
+                result = self.solve_with_notes(math_problem, topic)  # Remove 'await' here
                 if "error" not in result:
                     # Create the math solution HTML first
                     math_solution = f"""
@@ -689,6 +614,21 @@ function handleFeedback(isPositive) {{
         except Exception as e:
             print(f"Error in get_response: {e}", file=sys.stderr)
             return "😅 Oops! I had trouble with that. Could you try again?"
+
+    def _identify_math_topic(self, problem):
+        """Identify the mathematical topic of the problem"""
+        topics = {
+            'algebra': r'[a-z]|=',
+            'calculus': r'derivative|integral|lim',
+            'trigonometry': r'sin|cos|tan',
+            'geometry': r'area|volume|perimeter',
+            'statistics': r'mean|median|mode|variance'
+        }
+
+        for topic, pattern in topics.items():
+            if re.search(pattern, problem, re.IGNORECASE):
+                return topic
+        return 'basic_math'
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

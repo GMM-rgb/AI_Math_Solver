@@ -1,0 +1,17 @@
+{
+    "topic": "algebra",
+    "formulas": {
+        "linear": "ax + b = c",
+        "quadratic": "ax² + bx + c = 0",
+        "factoring": "(x + a)(x + b) = x² + (a+b)x + ab"
+    },
+    "examples": {
+        "linear": "2x + 3 = 7 → x = 2",
+        "quadratic": "x² + 2x + 1 = 0 → x = -1"
+    },
+    "tips": [
+        "Isolate variables on one side",
+        "Combine like terms first",
+        "Check solution by substituting back"
+    ]
+}

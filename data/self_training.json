@@ -148,12 +148,32 @@
             "user_msg": "Hello again",
             "ai_response": "Oh! \ud83d\udd50 \ud83d\udcd0 Good morning! Ready for some math? \ud83d\ude0a",
             "timestamp": "2025-02-09T11:01:00.961464"
+        },
+        {
+            "user_msg": "Hey",
+            "ai_response": "\u231a \ud83d\udcd0 Good morning! Ready for some math? \u231a",
+            "timestamp": "2025-02-09T11:04:22.603773"
+        },
+        {
+            "user_msg": "ok",
+            "ai_response": "\ud83d\udca1 \ud83c\udf93 Based on similar conversations, I think: I'm not sure I understand. Could you please rephrase? \ud83e\uddd0",
+            "timestamp": "2025-02-09T11:05:57.094943"
+        },
+        {
+            "user_msg": "What I mean is that I am ready",
+            "ai_response": "I'm not sure I understand. Could you please rephrase?",
+            "timestamp": "2025-02-09T11:06:20.422139"
+        },
+        {
+            "user_msg": "Help",
+            "ai_response": "I can solve math problems and provide step-by-step solutions. Try asking something like '2 + 2' or 'solve 2x+3=7'.",
+            "timestamp": "2025-02-09T11:06:32.918903"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-09T11:01:00.961468",
+        "last_updated": "2025-02-09T11:06:32.918910",
         "version": "1.0",
-        "total_conversations": 27,
+        "total_conversations": 31,
         "learning_sessions": 0
     }
 }

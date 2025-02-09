@@ -60,7 +60,7 @@
             "answer": 6,
             "steps": ["Multiply -3 by -2"],
             "variations": ["what is -3 times -2", "-3 times -2", "product of -3 and -2"]
-        }                
+        }         
     ],
     "math_patterns": {
         "what is": ["what's", "whats", "what is", "tell me"],
@@ -75,7 +75,7 @@
         "friendly": {
             "prefixes": ["Hey!", "Oh!", "Hmm...", "Let's see..."],
             "suffixes": ["😊", "✨", "💫"],
-            "fillers": ["Well,", "You know,", "I think", "Actually,"]
+            "fillers": ["Well,", "You know,", "Actually,", "Wait,"]
         },
         "professional": {
             "prefixes": ["Alright,", "Let me help you with that.", "I understand."],

@@ -30,8 +30,9 @@ class ChatService {
         }
 
         // First check for exact matches in conversations
+        const lowerMessage = message.toLowerCase().trim();
         for (const conv of this.trainingData.conversations) {
-            if (conv.variations.includes(message.toLowerCase())) {
+            if (conv.variations.includes(lowerMessage)) {
                 return {
                     response: this.getRandomResponse(conv.responses),
                     confidence: 100,
@@ -40,23 +41,23 @@ class ChatService {
             }
         }
 
-        // Then check for math patterns
+        // Then check for similar conversations
+        const match = this.matcher.findBestMatch(lowerMessage);
+        if (match && match.data && match.data.responses && match.score > 0.6) {
+            return {
+                response: this.getRandomResponse(match.data.responses),
+                confidence: match.score * 100,
+                type: 'chat'
+            };
+        }
+
+        // Then check for math patterns (if no conversation match found)
         const mathPattern = /[\d+\-*/()=xy]/;
         if (mathPattern.test(message)) {
             return {
                 response: message,
                 confidence: 90,
                 type: 'math'
-            };
-        }
-
-        // Check for similar conversations
-        const match = this.matcher.findBestMatch(message);
-        if (match && match.score > 0.6) {
-            return {
-                response: this.getRandomResponse(match.data.responses),
-                confidence: match.score * 100,
-                type: 'chat'
             };
         }
 
@@ -72,7 +73,8 @@ class ChatService {
         if (!Array.isArray(responses) || responses.length === 0) {
             return "I'm not sure how to respond to that.";
         }
-        return responses[Math.floor(Math.random() * responses.length)];
+        const response = responses[Math.floor(Math.random() * responses.length)];
+        return response || "I'm not sure how to respond to that.";
     }
 }
 

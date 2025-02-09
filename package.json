@@ -1,18 +1,25 @@
 {
   "name": "ai-math-solver",
   "version": "1.0.0",
+  "description": "AI Math Problem Solver with Chat Interface",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"No tests specified\" && exit 0",
-    "build": "mkdir -p dist && cp -r public/* dist/"
+    "build": "mkdir -p dist && cp -r public/* dist/",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "@tensorflow/tfjs": "^4.15.0",
     "@tensorflow/tfjs-node": "^4.15.0",
     "body-parser": "^1.20.3",
-    "express": "^4.21.2",
+    "express": "^4.18.2",
     "multer": "^1.4.5-lts.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "child_process": "^1.0.2",
+    "wikijs": "^6.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

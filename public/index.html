@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>AI Math Solver</title>
     <style>
         /* Base styles */
@@ -45,6 +45,9 @@
             z-index: 1000;
             overflow-y: auto;
             padding: 10px;
+            height: 100vh !important; /* Ensure full height */
+            display: flex;
+            flex-direction: column;
         }
 
         .conversation-item {
@@ -321,6 +324,7 @@
             outline: none;
             font-size: 16px !important; /* Minimum font size to prevent zoom */
             -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;  /* Add standard property */
             max-height: 44px !important;
             touch-action: manipulation;
         }
@@ -549,6 +553,8 @@
             textarea {
                 font-size: 16px !important; /* Prevents zoom on all form elements */
                 -webkit-appearance: none;
+                -webkit-text-size-adjust: 100%;
+                text-size-adjust: 100%;  /* Add standard property */
             }
 
             #userInput {
@@ -885,20 +891,205 @@
                 height: 100vh;
                 padding: 20px;
                 overflow: hidden;
+                display: flex;
             }
 
-            .conversation-list {
-                height: calc(100vh - 40px);
+            .chat-container {
+                margin-left: 270px;
+                max-width: 900px;
+                height: calc(100vh - 40px) !important;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                padding-bottom: 100px !important; /* Space for input */
+            }
+
+            .chat-messages {
+                flex: 1;
+                height: auto !important;
+                max-height: calc(100vh - 240px) !important;
                 overflow-y: auto;
-                border-bottom-right-radius: 15px;
+                margin-bottom: 80px !important;
+                padding-bottom: 20px !important;
+            }
+
+            .input-container {
+                position: absolute !important;
+                bottom: 20px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: calc(100% - 40px) !important;
+                margin-bottom: 0 !important;
+                border-radius: 15px !important;
+                background: white !important;
+                z-index: 1000;
             }
 
             #chatHeader {
+                flex: 0 0 auto;
                 position: sticky;
                 top: 0;
-                background: white;
                 z-index: 10;
                 padding: 10px 0;
+                background: white;
+            }
+
+            .conversation-list {
+                flex: 0 0 250px;
+                height: calc(100vh - 40px);
+                position: fixed;
+                overflow-y: auto;
+            }
+
+            footer {
+                position: fixed;
+                bottom: 0;
+                left: 270px;
+                right: 0;
+                padding: 10px;
+                background: transparent;
+                z-index: 900;
+            }
+        }
+
+        /* Update chat container for better mobile layout */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            padding-bottom: env(safe-area-inset-bottom) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Update chat messages container */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 15px;
+            padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+            margin-bottom: 0 !important;
+            position: relative;
+            height: auto !important;
+        }
+
+        /* Fix input container positioning */
+        .input-container {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            background: white !important;
+            padding: 12px !important;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+            margin: 0 !important;
+            z-index: 1000 !important;
+            transform: translateZ(0) !important;
+            -webkit-transform: translateZ(0) !important;
+        }
+
+        /* Mobile specific updates */
+        @media (max-width: 768px) {
+            body {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .chat-container {
+                height: 100vh !important;
+                max-height: -webkit-fill-available !important;
+                padding-bottom: 0 !important;
+            }
+
+            .chat-messages {
+                height: calc(100vh - 120px) !important;
+                max-height: calc(100vh - 120px) !important;
+                padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+            }
+
+            .input-container {
+                bottom: 0 !important;
+                padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+            }
+        }
+
+        /* Add Android keyboard fix */
+        @supports (-webkit-touch-callout: none) {
+            .chat-container {
+                height: -webkit-fill-available !important;
+            }
+
+            body {
+                height: -webkit-fill-available;
+            }
+
+            .input-container {
+                position: sticky !important;
+            }
+        }
+
+        /* Add collapsible footer styles */
+        .collapsible-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding: 15px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 9998;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .collapsible-footer.active {
+            transform: translateY(0);
+        }
+
+        .footer-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            font-size: 20px;
+        }
+
+        /* Update desktop layout */
+        @media (min-width: 769px) {
+            .collapsible-footer {
+                left: 250px; /* Account for conversation list */
+            }
+
+            .footer-toggle {
+                right: 30px;
+            }
+        }
+
+        /* Update mobile layout */
+        @media (max-width: 768px) {
+            .collapsible-footer {
+                padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            }
+
+            .footer-toggle {
+                bottom: calc(20px + env(safe-area-inset-bottom));
             }
         }
     </style>
@@ -1385,7 +1576,7 @@
                 newConversation();
             }
         }
-
+        
         async function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1505,15 +1696,115 @@
 
         function scrollToBottom(force = false) {
             const messages = document.getElementById('chatMessages');
-            if (force) {
-                messages.scrollTop = messages.scrollHeight;
-            } else {
-                messages.scrollTo({
-                    top: messages.scrollHeight,
-                    behavior: 'smooth'
-                });
+            const lastMessage = messages.lastElementChild;
+            
+            if (lastMessage) {
+                const containerHeight = messages.clientHeight;
+                const lastMessageBottom = lastMessage.offsetTop + lastMessage.offsetHeight;
+                const scrollDistance = lastMessageBottom - containerHeight;
+                
+                if (force) {
+                    messages.scrollTop = scrollDistance;
+                } else {
+                    messages.scrollTo({
+                        top: scrollDistance,
+                        behavior: 'smooth'
+                    });
+                }
             }
         }
+
+        // Add resize observer to handle keyboard
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add overlay div
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            overlay.onclick = closeConversationList;
+            document.body.appendChild(overlay);
+
+            // Add menu toggle button
+            const toggle = document.createElement('button');
+            toggle.className = 'conversation-toggle';
+            toggle.innerHTML = '☰';
+            toggle.onclick = toggleConversationList;
+            document.body.appendChild(toggle);
+
+            // Close menu when selecting a conversation on mobile
+            const conversationList = document.querySelector('.conversation-list');
+            conversationList.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    closeConversationList();
+                }
+            });
+
+            // Add touch event listeners for better mobile scrolling
+            const messages = document.getElementById('chatMessages');
+            let touchStartY;
+
+            messages.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            messages.addEventListener('touchmove', (e) => {
+                const touchY = e.touches[0].clientY;
+                const isAtBottom = messages.scrollHeight - messages.scrollTop === messages.clientHeight;
+                const isAtTop = messages.scrollTop === 0;
+                
+                // Prevent overscroll only at boundaries
+                if ((isAtBottom && touchY < touchStartY) || (isAtTop && touchY > touchStartY)) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // Add resize observer
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    if (entry.target === document.documentElement) {
+                        // Check if height changed due to keyboard
+                        if (window.innerHeight < window.visualViewport.height) {
+                            document.body.style.height = window.visualViewport.height + 'px';
+                            scrollToBottom(true);
+                        }
+                    }
+                }
+            });
+
+            resizeObserver.observe(document.documentElement);
+
+            // Handle viewport changes for mobile keyboards
+            if ('visualViewport' in window) {
+                window.visualViewport.addEventListener('resize', () => {
+                    if (window.visualViewport.height < window.innerHeight) {
+                        // Keyboard is open
+                        document.body.style.height = window.visualViewport.height + 'px';
+                        scrollToBottom(true);
+                    }
+                });
+            }
+        });
+
+        // Add footer toggle functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const footer = document.createElement('div');
+            footer.className = 'collapsible-footer';
+            footer.innerHTML = `
+                <p class="footer-text">Powered by <a href="about:blank">HtWebz Assistant</a> - & Created by Maximus Farvour</p>
+                <div style="margin-top: 10px;">
+                    <!-- Add any additional footer content here -->
+                </div>
+            `;
+
+            const toggle = document.createElement('button');
+            toggle.className = 'footer-toggle';
+            toggle.innerHTML = '↑';
+            toggle.addEventListener('click', () => {
+                footer.classList.toggle('active');
+                toggle.innerHTML = footer.classList.contains('active') ? '↓' : '↑';
+            });
+
+            document.body.appendChild(footer);
+            document.body.appendChild(toggle);
+        });
     </script>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2196F3">
@@ -1600,8 +1891,5 @@
             </div>
         </div>
     </div>
-        <footer>
-            <p class="footer-text">Powered by <a href="about:blank">HtWebz Assistant</a> - & Created by Maximus Farvour</p>
-        </footer>
-    </body>
+</body>
 </html>

@@ -29,6 +29,7 @@ try:
     from sympy.parsing.sympy_parser import parse_expr
     from src.utils.wiki_helper import WikiHelper
     from src.learning.self_learner import SelfLearner
+    from src.models.tf_model import MathTFModel  # Update this line
 except ImportError as e:
     print(json.dumps({
         "error": f"Import error: {str(e)}",
@@ -343,6 +344,7 @@ class ChatBot:
         self.self_learner = SelfLearner()
         self.notes_cache = {}
         self.local_notes_dir = os.path.join(self.data_dir, 'math_notes')
+        self.tf_model = MathTFModel()  # Add TF model
 
     def _get_math_notes(self, topic):  # Remove 'async'
         """Fetch relevant math notes for the topic"""
@@ -545,9 +547,9 @@ function handleFeedback(isPositive) {{
 
     def handle_greeting(self, message):
         hour = datetime.now().hour
-        if hour < 12:
+        if (hour < 12):
             return self.add_personality("Good morning! Ready for some math?", 'happy', ['time', 'math'])
-        elif hour < 17:
+        elif (hour < 17):
             return self.add_personality("Good afternoon! Let's solve some problems!", 'happy', ['time', 'math'])
         else:
             return self.add_personality("Good evening! Time for some math fun!", 'happy', ['time', 'math'])
@@ -587,43 +589,25 @@ function handleFeedback(isPositive) {{
 
     def get_response(self, message):
         try:
-            # Handle thank you messages
-            if message.lower() in ['thank you', 'thanks', 'thx', 'ty']:
-                return self.add_personality(
-                    random.choice([
-                        "You're welcome! Let me know if you need more help!",
-                        "Glad I could help! Feel free to ask more questions!",
-                        "No problem at all! Math is fun!"
-                    ]), 
-                    'happy', 
-                    ['success']
-                )
-
-            # Check for math problem first (prioritize math handling)
+            # Check if it's a math problem
             math_problem = self.extract_math_problem(message)
             if math_problem:
                 return self.handle_math(message)
-
-            # Look for conversation matches if not a math problem
-            if self.training_data and 'conversations' in self.training_data:
-                for conv in self.training_data.get('conversations', []):
-                    if message.lower() in [v.lower() for v in conv.get('variations', [])]:
-                        response = random.choice(conv['responses'])
-                        prefix = random.choice(self.training_data['personalities']['friendly']['prefixes'])
-                        suffix = random.choice(self.training_data['personalities']['friendly']['suffixes'])
-                        return f"{prefix} {response} {suffix}"
-
-            # If no match found, try math as fallback
-            return self.handle_math(message)
-
+            
+            # Get conversation response from TF model
+            response = self.tf_model.get_response(message)
+            prefix = self.tf_model.get_personality(prefix=True)
+            suffix = self.tf_model.get_personality(prefix=False)
+            return f"{prefix} {response} {suffix}"
+            
         except Exception as e:
             print(f"Error in get_response: {e}", file=sys.stderr)
             import traceback
-            print(traceback.format_exc(), file=sys.stderr)  # Add detailed error trace
+            print(traceback.format_exc(), file=sys.stderr)
             return self.add_personality(
-                "I had trouble solving that problem. Could you check the format and try again?",
+                "I had trouble with that. Could you try again?",
                 'error',
-                ['think', 'math']
+                ['think']
             )
 
     def _identify_math_topic(self, problem):

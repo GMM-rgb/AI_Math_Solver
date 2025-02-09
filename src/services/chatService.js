@@ -29,8 +29,26 @@ class ChatService {
             await this.initialize();
         }
 
-        // First check for exact matches in conversations
+        // First check for greetings
         const lowerMessage = message.toLowerCase().trim();
+        if (this.isGreeting(lowerMessage)) {
+            const hour = new Date().getHours();
+            let greeting;
+            if (hour < 12) {
+                greeting = "Good morning! Ready for some math? 🌅";
+            } else if (hour < 17) {
+                greeting = "Good afternoon! Let's solve some problems! 🌞";
+            } else {
+                greeting = "Good evening! Time for some math fun! 🌙";
+            }
+            return {
+                response: greeting,
+                confidence: 100,
+                type: 'chat'
+            };
+        }
+
+        // First check for exact matches in conversations
         for (const conv of this.trainingData.conversations) {
             if (conv.variations.includes(lowerMessage)) {
                 return {
@@ -67,6 +85,16 @@ class ChatService {
             confidence: 50,
             type: 'chat'
         };
+    }
+
+    isGreeting(message) {
+        const greetings = [
+            'hi', 'hello', 'hey', 'good morning', 'good afternoon', 
+            'good evening', 'yo', "what's up", 'howdy', 'hola', 
+            'hi there', 'hello there', 'hey there', 'whats up', 
+            'how are you', "how's it going", 'sup'
+        ];
+        return greetings.some(greeting => message.includes(greeting));
     }
 
     getRandomResponse(responses) {

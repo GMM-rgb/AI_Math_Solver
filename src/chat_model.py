@@ -452,6 +452,23 @@ class ChatBot:
     
     def _format_system_solution(self, equations, result):
         """Format the system of equations solution with HTML"""
+        # Get detailed steps from training data
+        steps = []
+        for problem in self.training_data["math_problems"]:
+            if all(eq in problem["input"] for eq in equations):
+                steps = problem["steps"]
+                break
+        
+        if not steps:
+            # Default steps if not found in training data
+            steps = [
+                "1. Original system of equations",
+                *[f"   {eq}" for eq in equations],
+                "2. Using substitution method",
+                "3. Solving simultaneously...",
+                f"4. Final solution: {result}"
+            ]
+
         return f"""
 <div class="math-solution">
     <div class="math-problem">
@@ -461,8 +478,14 @@ class ChatBot:
         </div>
     </div>
     <div class="solution">
-        <h3>Solution:</h3>
-        <div class="result">{result}</div>
+        <h3>Solution Steps:</h3>
+        <div class="steps">
+            {''.join(f'<div class="step" style="--index: {i+1}">{step}</div>' for i, step in enumerate(steps))}
+        </div>
+        <div class="final-result">
+            <h3>Final Answer:</h3>
+            <div class="result">{result}</div>
+        </div>
     </div>
 </div>
 <style>
@@ -495,6 +518,26 @@ class ChatBot:
         animation: slideIn 0.5s ease-out;
     }}
     .solution {{
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }}
+    .steps {{
+        margin: 15px 0;
+        padding: 10px;
+        background-color: white;
+        border-radius: 4px;
+    }}
+    .step {{
+        margin: 8px 0;
+        padding: 5px;
+        color: #555;
+        font-size: 1em;
+        animation: fadeIn 0.5s ease-out forwards;
+        animation-delay: calc(var(--index) * 0.2s);
+        opacity: 0;
+    }}
+    .final-result {{
         margin-top: 15px;
         padding-top: 15px;
         border-top: 1px solid #e9ecef;
@@ -613,7 +656,7 @@ if __name__ == "__main__":
         response = chatbot.get_response(sys.argv[1])
         
         # For math solutions that contain HTML
-        if isinstance(response, str) and response.strip().startswith('<'):
+        if isinstance(response, str) and response.strip().startsWith('<'):
             print(response)  # Print HTML as-is
         else:
             # For regular chat messages, just print the text directly

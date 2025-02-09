@@ -37,6 +37,54 @@ except ImportError as e:
     }))
     sys.exit(1)
 
+MATH_SYMBOLS = {
+    'x': ['x', '𝑥', '𝓍', '𝔵', 'χ'],
+    'y': ['y', '𝑦', '𝓎', '𝔶', 'γ'],
+    'z': ['z', '𝑧', '𝓏', '𝔷', 'ζ'],
+    '+': ['+', '＋', '➕', '∑'],
+    '-': ['-', '−', '－', '➖'],
+    '*': ['*', '×', '⋅', '∗', '⨯'],
+    '/': ['/', '÷', '∕', '⁄'],
+    '=': ['=', '＝', '≡', '≈', '≋'],
+    '^': ['^', '⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
+}
+
+def clean_equation(eq):
+    """Clean equation string of unwanted characters and normalize format"""
+    # Replace special math characters with standard ones
+    cleaned = eq.strip()
+    cleaned = re.sub(r'[""''‛]', '', cleaned)  # Remove smart quotes
+    cleaned = re.sub(r'[×⋅∗⨯]', '*', cleaned)  # Normalize multiplication
+    cleaned = re.sub(r'[÷∕⁄]', '/', cleaned)   # Normalize division
+    cleaned = re.sub(r'[−–—]', '-', cleaned)   # Normalize minus
+    cleaned = re.sub(r'[=＝≡≈≋]', '=', cleaned) # Normalize equals
+    cleaned = re.sub(r'\s+', ' ', cleaned)     # Normalize spaces
+    return cleaned
+
+def normalize_characters(text):
+    """Normalize special mathematical characters to standard ASCII"""
+    chars = {
+        '−': '-',  # U+2212 minus sign
+        '–': '-',  # en dash
+        '—': '-',  # em dash
+        '⁃': '-',  # hyphen bullet
+        '‐': '-',  # hyphen
+        '⁄': '/',  # fraction slash
+        '∕': '/',  # division slash
+        '÷': '/',  # division sign
+        '×': '*',  # multiplication sign
+        '⋅': '*',  # dot operator
+        '∗': '*',  # asterisk operator
+        '·': '*',  # middle dot
+        '⨯': '*',  # vector multiplication
+        '∙': '*',  # bullet operator
+        '⁺': '+',  # superscript plus
+        '⁻': '-',  # superscript minus
+    }
+    for special, standard in chars.items():
+        text = text.replace(special, standard)
+    return text
+
 class SimpleMathModel:
     def __init__(self):
         self.initialized = True
@@ -50,6 +98,33 @@ class SimpleMathModel:
         }
         from sympy import symbols
         self.x, self.y, self.z = symbols('x y z')
+        self.symbol_map = self._create_symbol_map()
+
+    def _create_symbol_map(self):
+        """Create a mapping of all possible symbols to their standard form"""
+        mapping = {}
+        for standard, variations in MATH_SYMBOLS.items():
+            for variant in variations:
+                mapping[variant] = standard
+        return mapping
+
+    def _normalize_expression(self, expression):
+        """Convert all mathematical symbols to their standard form"""
+        normalized = ''
+        i = 0
+        while i < len(expression):
+            found = False
+            # Try to match multi-char symbols first
+            for variant, standard in self.symbol_map.items():
+                if expression[i:].startswith(variant):
+                    normalized += standard
+                    i += len(variant)
+                    found = True
+                    break
+            if not found:
+                normalized += expression[i]
+                i += 1
+        return normalized
 
     def _identify_problem_type(self, problem):
         """Identify the type of math problem"""
@@ -63,6 +138,8 @@ class SimpleMathModel:
 
     def _safe_eval(self, problem):
         """Safely evaluate math expression without using eval()"""
+        # Normalize the expression first
+        problem = self._normalize_expression(problem)
         # Clean and tokenize the expression
         problem = problem.replace(' ', '')
         problem = problem.replace('^', '**')
@@ -110,7 +187,7 @@ class SimpleMathModel:
     def solve_system_of_equations(self, equations):
         """Solve a system of linear equations"""
         try:
-            from sympy import symbols, solve, simplify, latex
+            from sympy import symbols, solve, simplify
             from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
             
             x, y = symbols('x y')
@@ -118,52 +195,40 @@ class SimpleMathModel:
             
             system = []
             for eq in equations:
+                eq = normalize_characters(clean_equation(eq))  # Add normalization here
                 if '=' in eq:
                     left, right = eq.split('=')
+                    # Convert to standard form: ax + by + c = 0
                     expr = parse_expr(left, transformations=transformations) - parse_expr(right, transformations=transformations)
                     system.append(expr)
             
+            # Solve the system
             solution = solve(system, [x, y])
             
-            def clean_solution(expr):
-                try:
-                    # First try standard simplification
-                    simp = simplify(expr)
-                    # Convert to a string and clean up
-                    result = str(simp)
-                    # Replace mathematical notations with cleaner versions
-                    result = (result.replace('sqrt', '√')
-                                  .replace('**', '^')
-                                  .replace('*', '×')
-                                  .replace('+-', '-')
-                                  .replace('-+', '-'))
-                    # Remove unnecessary symbols and spaces
-                    result = result.replace('×1', '').replace('1×', '')
-                    # Clean up negative signs
-                    result = result.replace('+ -', '- ').replace('- -', '+ ')
-                    return result
-                except:
-                    return str(expr)
-
-            # Format the solution based on its type
+            # Clean and format solution
             if isinstance(solution, dict):
-                return ", ".join(f"{var} = {clean_solution(val)}" for var, val in solution.items())
+                return ", ".join(f"{var} = {simplify(val)}" for var, val in solution.items())
             elif isinstance(solution, list):
-                formatted = []
-                for sol in solution:
-                    if isinstance(sol, tuple):
-                        x_val = clean_solution(sol[0])
-                        y_val = clean_solution(sol[1])
-                        # Further simplify if possible
-                        formatted.append(f"x = {x_val}, y = {y_val}")
-                return " or ".join(formatted)
+                if len(solution) == 0:
+                    return "No solution"
+                elif len(solution) == 1:
+                    return f"x = {solution[0][0]}, y = {solution[0][1]}"
+                else:
+                    solutions = []
+                    for sol in solution:
+                        x_val = simplify(sol[0])
+                        y_val = simplify(sol[1])
+                        solutions.append(f"x = {x_val}, y = {y_val}")
+                    return " or ".join(solutions)
             
-            return clean_solution(solution)
+            return str(simplify(solution))
             
         except Exception as e:
-            return f"Error solving system: {str(e)}"
+            return f"Could not solve system: {str(e)}"
 
     def solve(self, problem):
+        # Normalize the problem first
+        problem = self._normalize_expression(problem)
         # Handle system of equations first
         if '\n' in problem or ',' in problem:
             equations = [eq.strip() for eq in problem.replace(',', '\n').split('\n') if eq.strip()]
@@ -294,6 +359,11 @@ class ChatBot:
 
     def extract_math_problem(self, message):
         """Extract math problem from natural language question"""
+        # First normalize any mathematical symbols
+        for standard, variations in MATH_SYMBOLS.items():
+            for variant in variations:
+                message = message.replace(variant, standard)
+        
         clean_msg = message.lower()
         
         # Improved system of equations detection
@@ -531,184 +601,22 @@ function handleFeedback(isPositive) {{
         )
     
     def _format_system_solution(self, equations, result):
-        """Format the system of equations solution with HTML"""
-        # Get detailed steps from training data
-        steps = []
-        for problem in self.training_data["math_problems"]:
-            if all(eq in problem["input"] for eq in equations):
-                steps = problem["steps"]
-                break
-        
-        if not steps:
-            # Default steps if not found in training data
-            steps = [
-                "1. Original system of equations:",
-                *[f"   {eq}" for eq in equations],
-                "2. Solving the system...",
-                f"3. Solution: {result}"
-            ]
+        """Format the system of equations solution with cleaner HTML"""
+        steps = [
+            "Original system:",
+            *[f"  {eq}" for eq in equations],
+            "Solution:",
+            f"  {result}"
+        ]
 
         return f"""
 <div class="math-solution">
-    <div class="math-problem">
-        <h3>System of Equations:</h3>
-        <div class="equations">
-            {'<br>'.join(f'<div class="equation">{eq}</div>' for eq in equations)}
-        </div>
+    <div class="problem">System of Equations</div>
+    <div class="steps">
+        {''.join(f'<div class="step">{step}</div>' for step in steps)}
     </div>
-    <div class="solution">
-        <h3>Solution Steps:</h3>
-        <div class="steps">
-            {''.join(f'<div class="step" style="--index: {i+1}">{step}</div>' for i, step in enumerate(steps))}
-        </div>
-        <div class="final-result">
-            <h3>Final Answer:</h3>
-            <div class="result">{result}</div>
-        </div>
-    </div>
-    <div class="feedback">
-        <button onclick="handleFeedback(true)" class="feedback-btn positive">
-            <span class="emoji">👍</span> Helpful
-        </button>
-    </div>
-</div>
-<style>
-    .math-solution {{
-        visibility: visible !important;
-        opacity: 1 !important;
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 15px 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        font-family: 'Arial', sans-serif;
-    }}
-    .math-solution * {{
-        visibility: visible !important;
-        opacity: 1 !important;
-    }}
-    .feedback {{
-        margin-top: 15px;
-        text-align: right;
-    }}
-    .feedback-btn {{
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 20px;
-        padding: 8px 16px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }}
-    .feedback-btn:hover {{
-        background: #f0f0f0;
-    }}
-    .feedback-btn.positive {{
-        color: #4CAF50;
-    }}
-    .feedback-btn .emoji {{
-        font-size: 1.2em;
-    }}
-    .equation, .step {{
-        display: block;
-        opacity: 1 !important;
-        transform: none;
-        animation: gentleFade 0.5s ease-out;
-        animation-delay: calc(var(--index) * 0.1s);
-    }}
-    @keyframes gentleFade {{
-        from {{ 
-            opacity: 0.9 !important;
-            transform: translateY(-2px);
-        }}
-        to {{ 
-            opacity: 1 !important;
-            transform: translateY(0);
-        }}
-    }}
-    .math-solution h3 {{
-        color: #2196F3;
-        margin: 0 0 10px 0;
-        font-size: 1.2em;
-    }}
-    .equations {{
-        margin: 10px 0;
-        padding: 10px;
-        background-color: white;
-        border-radius: 4px;
-    }}
-    .equation {{
-        font-family: 'Consolas', monospace;
-        font-size: 1.1em;
-        margin: 5px 0;
-        color: #333;
-        padding: 5px;
-        border-radius: 4px;
-    }}
-    .equation:hover {{
-        background-color: rgba(33, 150, 243, 0.05);
-    }}
-    .solution {{
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #e9ecef;
-    }}
-    .steps {{
-        margin: 15px 0;
-        padding: 10px;
-        background-color: white;
-        border-radius: 4px;
-    }}
-    .step {{
-        margin: 8px 0;
-        padding: 8px;
-        color: #555;
-        font-size: 1em;
-        border-radius: 4px;
-        transition: background-color 0.2s ease;
-    }}
-    .step:hover {{
-        background-color: rgba(33, 150, 243, 0.05);
-    }}
-    .result {{
-        font-size: 1.2em;
-        color: #28a745;
-        font-weight: bold;
-        padding: 10px;
-        background-color: white;
-        border-radius: 4px;
-    }}
-    @keyframes highlightAnswer {{
-        0% {{ background-color: rgba(40, 167, 69, 0.1); }}
-        50% {{ background-color: rgba(40, 167, 69, 0.05); }}
-        100% {{ background-color: white; }}
-    }}
-</style>
-<script>
-function handleFeedback(isPositive) {{
-    if (isPositive) {{
-        const btn = event.target.closest('.feedback-btn');
-        btn.style.background = '#4CAF50';
-        btn.style.color = '#fff';
-        btn.innerHTML = '<span class="emoji">✨</span> Thanks!';
-        btn.disabled = true;
-        
-        // Send feedback to server
-        fetch('/feedback', {{
-            method: 'POST',
-            headers: {{ 'Content-Type': 'application/json' }},
-            body: JSON.stringify({{ 
-                positive: true,
-                solution: "{result}",
-                equations: {equations}
-            }})
-        }});
-    }}
-}}
-</script>"""
+    <div class="result">{result}</div>
+</div>"""
 
     def handle_greeting(self, message):
         hour = datetime.now().hour
@@ -754,10 +662,22 @@ function handleFeedback(isPositive) {{
 
     def get_response(self, message):
         try:
-            # Look for conversation matches first
+            if message.lower() in ['thank you', 'thanks', 'thx', 'ty']:
+                # Handle thank you messages directly
+                return self.add_personality(
+                    random.choice([
+                        "You're welcome! Let me know if you need more help!",
+                        "Glad I could help! Feel free to ask more questions!",
+                        "No problem at all! Math is fun!"
+                    ]), 
+                    'happy', 
+                    ['success']
+                )
+
+            # Look for other conversation matches
             if self.training_data and 'conversations' in self.training_data:
-                for conv in self.training_data['conversations']:
-                    if message.lower() in [v.lower() for v in conv.get('variations', [])]:
+                for conv in self.training_data.get('conversations', []):
+                    if any(v.lower() == message.lower() for v in conv.get('variations', [])):
                         response = random.choice(conv['responses'])
                         prefix = random.choice(self.training_data['personalities']['friendly']['prefixes'])
                         suffix = random.choice(self.training_data['personalities']['friendly']['suffixes'])
@@ -765,9 +685,10 @@ function handleFeedback(isPositive) {{
 
             # If no conversation match, try math problem
             return self.handle_math(message)
+
         except Exception as e:
             print(f"Error in get_response: {e}", file=sys.stderr)
-            return f"😅 Oops! I had trouble with that. Could you try again?"
+            return "😅 Oops! I had trouble with that. Could you try again?"
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

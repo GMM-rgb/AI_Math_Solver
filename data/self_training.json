@@ -108,12 +108,22 @@
             "user_msg": "Hi",
             "ai_response": "\ud83d\udd50 \ud83d\udd22... Good evening! Time for some math fun! \ud83d\udd50",
             "timestamp": "2025-02-08T20:12:18.146973"
+        },
+        {
+            "user_msg": "Hi",
+            "ai_response": "Good evening! Time for some math fun! \u23f0 \ud83d\udd22 \ud83d\ude42",
+            "timestamp": "2025-02-08T20:35:08.098824"
+        },
+        {
+            "user_msg": "Hello",
+            "ai_response": "Good evening! Time for some math fun! \ud83d\ude42 \u270f\ufe0f \u23f0",
+            "timestamp": "2025-02-08T20:37:06.079633"
         }
     ],
     "metadata": {
-        "last_updated": "2025-02-08T20:12:18.146979",
+        "last_updated": "2025-02-08T20:37:06.079637",
         "version": "1.0",
-        "total_conversations": 19,
+        "total_conversations": 21,
         "learning_sessions": 0
     }
 }

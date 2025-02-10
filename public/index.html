@@ -81,10 +81,11 @@
             border-radius: 4px;
             cursor: pointer;
             position: relative;
+            transition: all 0.5 ease !important;
         }
 
         .conversation-item:hover {
-            background: #e0e0e0;
+            background: #d7d7d7;
         }
 
         .conversation-item .delete-btn {
@@ -107,17 +108,23 @@
         .conversation-toggle {
             display: none;
             position: fixed;
-            left: 10px;
-            top: 10px;
+            left: 10px !important;
+            top: 10px !important;
             z-index: 1001;
             padding: 8px;
+            height: 38.5px;
+            width: 38.5px;
             background: #2196F3;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            width: 40px;
             z-index: 9999;
+            transition: all 0.5s ease !important;
+        }
+        .conversation-toggle:hover {
+            background: #1976D2;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
 
         /* Chat container styles */
@@ -132,11 +139,11 @@
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
-            margin-left: calc(250px + 5%) !important;
-            margin-right: 5% !important;
+            margin-left: calc(250px + 2%) !important; /* Reduced side margin */
+            margin-right: 2% !important; /* Reduced side margin */
             border-radius: 0 !important;
             overflow: hidden;
-            padding-top: 10px !important; /* Reduced top padding */
+            padding: 0 !important; /* Remove padding */
         }
 
         /* Chat messages area */
@@ -154,7 +161,9 @@
         }
 
         .message {
-            margin: 5px 0;
+            margin: 4px 0 !important;
+            max-width: 95% !important; /* Prevent messages from being cut off */
+            width: auto !important;
             padding: 10px;
             border-radius: 15px !important;
             -webkit-transform: translateZ(0);
@@ -394,8 +403,8 @@
 
         .footer-toggle {
             position: fixed;
-            bottom: 20px !important;
-            left: 270px !important;
+            top: 20px !important;
+            left: 275px !important;
             width: 44px;
             height: 44px;
             background: #2196F3;
@@ -428,7 +437,27 @@
 
             .chat-container {
                 margin: 0 !important;
-                padding-top: 5px !important; /* Even less top padding on mobile */
+                padding: 0 !important;
+            }
+
+            .chat-messages {
+                padding: 5px 10px;
+            }
+
+            .message {
+                max-width: 92% !important; /* Slightly narrower on mobile */
+            }
+
+            #chatHeader {
+                padding: 3px 10px !important;
+            }
+
+            .page-title {
+                font-size: 1.2em !important;
+            }
+
+            .sub-title {
+                font-size: 0.8em !important;
             }
 
             .chat-messages {
@@ -464,6 +493,7 @@
             .chat-messages::-webkit-scrollbar {
                 width: 6px !important;
                 height: 6px !important;
+                opacity: 0.5;
             }
 
             .chat-messages::-webkit-scrollbar-thumb {
@@ -478,6 +508,8 @@
             .footer-toggle {
                 left: 10px !important;
                 top: 50px !important;
+                height: 38.5px !important;
+                width: 38.5px !important;
             }
 
             .collapsible-footer {
@@ -503,6 +535,7 @@
             left: 0;
             right: 0;
             bottom: 0;
+            height: auto !important;
             background: rgba(0,0,0,0.5);
             z-index: 999;
         }
@@ -1298,8 +1331,6 @@
         }
     </style>
     <style>
-    /* ...existing styles... */
-
     /* Updated Footer Styles */
     .collapsible-footer {
         position: fixed;
@@ -1373,12 +1404,16 @@
             bottom: 80px;
         }
     }
+    .new-chat:hover {
+        transition: all 0.3s ease;
+        background: rgb(59, 137, 62);
+    }
 </style>
 </head>
 <body>
     <div class="app-container">
         <div class="conversation-list" id="conversationList">
-            <button onclick="newConversation()" style="width: 100%; margin-bottom: 10px;">New Chat</button>
+            <button onclick="newConversation()" class="new-chat" style="width: 100%; margin-bottom: 10px;">New Chat</button>
         </div>
         
         <div class="chat-container">

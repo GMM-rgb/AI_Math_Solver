@@ -14,8 +14,8 @@
             overflow: hidden;
             width: 100vw;
             height: 100vh;
-            -webkit-overflow-scrolling: touch;
             position: fixed;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Typography */
@@ -70,6 +70,8 @@
             height: 100vh !important;
             display: flex;
             flex-direction: column;
+            z-index: 9998;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
         }
 
         .conversation-item {
@@ -115,6 +117,7 @@
             border-radius: 4px;
             cursor: pointer;
             width: 40px;
+            z-index: 9999;
         }
 
         /* Chat container styles */
@@ -151,10 +154,10 @@
             margin: 5px 0;
             padding: 10px;
             border-radius: 15px !important;
-            transform: translateZ(0);
             -webkit-transform: translateZ(0);
-            backface-visibility: hidden;
+            transform: translateZ(0);
             -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         .user-message {
@@ -1248,6 +1251,83 @@
             background: #1976D2;
         }
     </style>
+    <style>
+    /* ...existing styles... */
+
+    /* Updated Footer Styles */
+    .collapsible-footer {
+        position: fixed;
+        bottom: 0;
+        left: flex-start;
+        width: calc(100% - 250px);
+        background: rgba(255, 255, 255, 0.98);
+        border-top: 1px solid rgba(0,0,0,0.1);
+        border-top-left-radius: 10px 12.5px;
+        border-top-right-radius: 10px 12.5px;
+        padding: 20px;
+        transform: translateY(100%);
+        transition: all 0.3s ease-out;
+        z-index: 9997;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+    }
+
+    .collapsible-footer.active {
+        transform: translateY(0);
+    }
+
+    .footer-text {
+        text-align: center;
+        font-size: 1.25em;
+        color: #333;
+        -webkit-text-stroke: 0.5px #004f9e;
+        -webkit-text-fill-color: #2196F3;
+        font-weight: bold;
+        margin: 0;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .footer-toggle {
+        position: fixed;
+        bottom: 20px;
+        left: 270px;
+        margin-left: 1.5px;
+        width: 44px;
+        height: 44px;
+        background: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        font-size: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .footer-toggle:hover {
+        transform: translateY(-2px);
+        background: #1976D2;
+    }
+
+    @media (max-width: 768px) {
+        .collapsible-footer {
+            left: 0;
+            width: 100%;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+        }
+
+        .footer-toggle {
+            left: auto;
+            right: 20px;
+            bottom: 80px;
+        }
+    }
+</style>
 </head>
 <body>
     <div class="app-container">
@@ -1274,5 +1354,31 @@
             </div>
         </div>
     </div>
+    <div class="collapsible-footer">
+        <p class="footer-text">
+            Powered by <a href="javascript:void(0)">HtWebz Assistant</a> - Created by Maximus Farvour
+        </p>
+        <div style="margin-top: 10px; text-align: center; font-size: 0.9em; color: #666;">
+            © 2024 All rights reserved
+        </div>
+    </div>
+    <button class="footer-toggle" aria-label="Toggle footer">↑</button>
+
+    <script>
+        // Add this to your existing DOMContentLoaded event or as a separate script
+        document.querySelector('.footer-toggle').addEventListener('click', () => {
+            const footer = document.querySelector('.collapsible-footer');
+            const toggle = document.querySelector('.footer-toggle');
+            footer.classList.toggle('active');
+            toggle.innerHTML = footer.classList.contains('active') ? '↓' : '↑';
+            
+            // Adjust chat messages padding when footer is shown
+            const chatMessages = document.querySelector('.chat-messages');
+            if (chatMessages) {
+                chatMessages.style.paddingBottom = footer.classList.contains('active') ? 
+                    'calc(100px + 80px)' : '100px';
+            }
+        });
+    </script>
 </body>
 </html>

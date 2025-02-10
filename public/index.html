@@ -627,18 +627,20 @@
             color: white;
             border: 2px solid rgba(0, 0, 0, 0.1);
             border-radius: 10px;
-            z-index: 9999;
+            z-index: 9998;  /* Lower than the button */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             font-size: 14px;
             font-weight: bold;
             opacity: 0;
+            visibility: hidden;  /* Add visibility property */
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
             white-space: nowrap;
         }
 
         .footer-toggle-container.visible {
             opacity: 1;
+            visibility: visible;  /* Show when visible class is added */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
@@ -1566,16 +1568,19 @@
         const footerToggleBtn = document.getElementById('footer-toggle');
         let tooltipTimeout;
 
-        footerToggleBtn.addEventListener('mouseenter', () => {
+        footerToggleBtn.addEventListener('mouseover', () => {
             clearTimeout(tooltipTimeout);
             tooltipTimeout = setTimeout(() => {
                 footerToggleContainer.classList.add('visible');
             }, 500);
         });
 
-        footerToggleBtn.addEventListener('mouseleave', () => {
+        footerToggleBtn.addEventListener('mouseout', (e) => {
             clearTimeout(tooltipTimeout);
-            footerToggleContainer.classList.remove('visible');
+            // Check if we're not moving to the tooltip container
+            if (!e.relatedTarget || !e.relatedTarget.closest('.footer-toggle-container')) {
+                footerToggleContainer.classList.remove('visible');
+            }
         });
 
         document.querySelector('.footer-toggle').addEventListener('click', () => {

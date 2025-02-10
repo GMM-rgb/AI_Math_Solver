@@ -41,6 +41,7 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
+            justify-content: center; /* Center chat container */
         }
 
         /* Conversation list styles */
@@ -109,7 +110,7 @@
         /* Chat container styles */
         .chat-container {
             flex: 1;
-            max-width: 100%;
+            max-width: 100% !important; /* Limit the max width */
             height: calc(100vh - 100px);  /* Adjust for viewport height */
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
@@ -126,6 +127,8 @@
             width: 100%;
             height: 100vh;
             border-radius: 0 !important;
+            margin-left: calc(250px + 5%) !important; /* Space for sidebar + center offset */
+            margin-right: 5% !important;
         }
 
         .chat-messages {
@@ -938,7 +941,6 @@
 
             .chat-container {
                 margin-left: 270px;
-                max-width: 900px;
                 height: calc(100vh - 40px) !important;
                 display: flex;
                 flex-direction: column;
@@ -1045,6 +1047,7 @@
             .chat-container {
                 height: 100vh !important;
                 max-height: -webkit-fill-available !important;
+                width: 100% !important;
                 padding-bottom: 0 !important;
             }
 
@@ -1124,6 +1127,21 @@
 
             .footer-toggle {
                 right: 30px;
+                left: 270px !important; /* Align with chat container */
+                bottom: 20px !important;
+                top: auto !important;
+            }
+
+            .collapsible-footer {
+                left: 250px !important;
+                width: calc(100% - 250px) !important;
+            }
+
+            .chat-container {
+                border-radius: 15px !important;
+                margin: 20px auto !important;
+                margin-left: calc(250px + 125px) !important;
+                height: calc(100vh - 40px) !important;
             }
         }
 
@@ -1135,6 +1153,22 @@
 
             .footer-toggle {
                 bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .footer-toggle {
+                left: 10px !important;
+                top: 70px !important;
+            }
+
+            .chat-container {
+                margin: 0 !important;
+                border-radius: 0 !important;
+            }
+
+            .collapsible-footer {
+                position: fixed !important;
+                margin-left: 0 !important;
+                width: 120% !important;
             }
         }
     </style>

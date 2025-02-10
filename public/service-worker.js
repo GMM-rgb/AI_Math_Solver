@@ -22,14 +22,23 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     Promise.all([
-      // Cache static assets
-      caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)),
-      // Cache model files separately
-      caches.open(MODEL_CACHE).then(cache => 
-        cache.addAll([
-          '/model/model.json',
-          '/model/weights.bin'
-        ])
+      // Cache static assets individually to log and ignore failures
+      caches.open(CACHE_NAME).then(cache =>
+        Promise.all(urlsToCache.map(url =>
+          cache.add(new Request(url)).catch(err => {
+            console.error(`Failed to cache ${url}:`, err);
+          })
+        ))
+      ),
+      // Cache model files individually
+      caches.open(MODEL_CACHE).then(cache =>
+        Promise.all(
+          ['/model/model.json', '/model/weights.bin'].map(url =>
+            cache.add(new Request(url)).catch(err => {
+              console.error(`Failed to cache ${url}:`, err);
+            })
+          )
+        )
       )
     ])
   );
@@ -37,27 +46,30 @@ self.addEventListener('install', event => {
 
 // Fetch event - serve from cache, then network
 self.addEventListener('fetch', event => {
+  // Handle API requests
+  if (event.request.url.includes('/chat')) {
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        new Response(JSON.stringify({
+          response: "You're offline. Please check your connection and try again.",
+          type: "error"
+        }), {
+          headers: { 'Content-Type': 'application/json' }
+        })
+      )
+    );
+    return;
+  }
+  
+  // Handle other requests
   event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) {
-        return response; // Return cached version
-      }
-      return fetch(event.request).then(fetchResponse => {
-        // Check if we should cache this request
-        if (fetchResponse.status === 200) {
-          const responseToCache = fetchResponse.clone();
-          
-          // Cache model files in MODEL_CACHE, other dynamic responses in DYNAMIC_CACHE
-          const cacheName = event.request.url.includes('/model/') ? 
-            MODEL_CACHE : DYNAMIC_CACHE;
-          
-          caches.open(cacheName).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+      .catch(() => {
+        if (event.request.headers.get('accept').includes('text/html')) {
+          return caches.match('/offline.html');
         }
-        return fetchResponse;
-      });
-    })
+      })
   );
 });
 
@@ -73,34 +85,5 @@ self.addEventListener('activate', event => {
         })
       );
     })
-  );
-});
-
-// Handle offline functionality
-self.addEventListener('fetch', event => {
-  // Handle API requests
-  if (event.request.url.includes('/chat')) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response(JSON.stringify({
-          response: "You're offline. Please check your connection and try again.",
-          type: "error"
-        }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      })
-    );
-    return;
-  }
-  
-  // Handle other requests
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-      .catch(() => {
-        if (event.request.headers.get('accept').includes('text/html')) {
-          return caches.match('/offline.html');
-        }
-      })
   );
 });

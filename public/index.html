@@ -656,6 +656,23 @@
             opacity: 1;
             visibility: visible;  /* Show when visible class is added */
         }
+
+        .ocr-status {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #2196F3;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .ocr-status.visible {
+            opacity: 1;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script src="js/tf_model.js"></script>
@@ -1145,34 +1162,70 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Create preview
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const preview = new Image();
-                preview.src = e.target.result;
-                preview.className = 'preview-image';
+            const inputContainer = document.querySelector('.input-container');
+            const userInput = document.getElementById('userInput');
+            
+            // Add status element
+            let status = inputContainer.querySelector('.ocr-status');
+            if (!status) {
+                status = document.createElement('div');
+                status.className = 'ocr-status';
+                inputContainer.insertBefore(status, inputContainer.firstChild);
+            }
 
-                // Add preview above input
-                const inputContainer = document.querySelector('.input-container');
-                inputContainer.insertBefore(preview, inputContainer.firstChild);
+            // Show processing status
+            status.textContent = 'Processing image...';
+            status.classList.add('visible');
 
-                // Process image with OCR
+            try {
                 const formData = new FormData();
                 formData.append('image', file);
 
-                try {
-                    const response = await fetch('/processImage', {
-                        method: 'POST',
-                        body: formData
-                    });
+                const response = await fetch('/processImage', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                    const result = await response.text();
-                    document.getElementById('userInput').value = result;
-                } catch (error) {
-                    console.error('Error processing image:', error);
+                const result = await response.json();
+                
+                // Parse the text from the response
+                let extractedText = '';
+                try {
+                    // Handle nested JSON if present
+                    const parsedText = JSON.parse(result.text);
+                    extractedText = parsedText.text || '';
+                } catch {
+                    // If not nested, use the text directly
+                    extractedText = result.text || '';
                 }
-            };
-            reader.readAsDataURL(file);
+
+                // Update input with the cleaned text
+                userInput.value = extractedText;
+                
+                // Show status message
+                status.textContent = result.message;
+                setTimeout(() => status.classList.remove('visible'), 3000);
+
+                // Clean up the file input and any preview
+                event.target.value = ''; // Reset file input
+                const preview = inputContainer.querySelector('.preview-image');
+                if (preview) {
+                    preview.remove();
+                }
+
+            } catch (error) {
+                console.error('Error processing image:', error);
+                status.textContent = 'Error processing image';
+                status.style.color = '#ff4444';
+                setTimeout(() => status.classList.remove('visible'), 3000);
+                
+                // Clean up on error too
+                event.target.value = '';
+                const preview = inputContainer.querySelector('.preview-image');
+                if (preview) {
+                    preview.remove();
+                }
+            }
         }
 
         async function addGreeting() {
@@ -1521,6 +1574,7 @@
                 left: auto;
                 right: 20px;
                 bottom: 80px;
+                opacity: 0.65;
             }
         }
 

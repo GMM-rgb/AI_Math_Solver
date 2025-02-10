@@ -6,6 +6,8 @@ const { spawn } = require('child_process');
 const wikiService = require('./src/services/wikiService');
 const chatService = require('./src/services/chatService');
 const textGenService = require('./src/services/textGenService');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 const app = express();
 const port = process.env.PORT || 3001;
     
@@ -231,6 +233,61 @@ app.post('/feedback', async (req, res) => {
         }
     } else {
         res.json({ success: true }); // Always return success for negative feedback
+    }
+});
+
+// Update the processImage endpoint
+app.post('/processImage', upload.single('image'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('No image uploaded');
+    }
+
+    try {
+        const pythonProcess = spawn('python3', [
+            path.join(__dirname, 'src', 'screen_capture.py'),
+            req.file.path
+        ]);
+
+        let result = '';
+        let errorOutput = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            result += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            errorOutput += data.toString();
+        });
+
+        pythonProcess.on('close', (code) => {
+            // Clean up uploaded file
+            fs.unlinkSync(req.file.path);
+
+            if (code !== 0) {
+                return res.status(500).send(errorOutput);
+            }
+
+            try {
+                const parsedResult = JSON.parse(result);
+                // Check if text contains math operators or numbers
+                const hasMath = /[\d+\-*/()=x²³¹⁴⁵⁶⁷⁸⁹⁰]+/.test(parsedResult.text);
+                
+                res.json({
+                    text: parsedResult.text,
+                    isMath: hasMath,
+                    message: hasMath ? "Math problem: yes" : "Math problem: no"
+                });
+            } catch (parseError) {
+                res.status(500).send('Error parsing OCR result');
+            }
+        });
+    } catch (error) {
+        // Clean up file if there's an error
+        if (req.file) {
+            fs.unlinkSync(req.file.path);
+        }
+        console.error('Image processing error:', error);
+        res.status(500).send('Error processing image');
     }
 });
 

@@ -457,6 +457,7 @@
             left: 275px !important;
             width: 44px;
             height: 44px;
+            line-height: 44px;  /* Match height for vertical centering */
             background: #2196F3;
             color: white;
             border: none;
@@ -466,11 +467,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             font-size: 20px;
+            transform: translateZ(0);  /* Force GPU acceleration */
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s ease;
         }
 
-        /* Mobile styles */
+        .footer-toggle:hover {
+            background: #1976D2;
+        }
+
+        .footer-toggle::before,
+        .footer-toggle::after {
+            display: none;
+        }
+
         @media (max-width: 768px) {
 
             /* Add all existing mobile styles here */
@@ -1356,6 +1370,23 @@
             document.body.appendChild(footer);
             document.body.appendChild(toggle);
         });
+
+        const footerToggleContainer = document.getElementById('footer-toggle-container');
+        const footerToggleBtn = document.getElementById('footer-toggle');
+        let tooltipTimeout;
+
+        // Use mouseenter/mouseleave for more reliable hover detection
+        footerToggleBtn.addEventListener('mouseenter', () => {
+            clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => {
+                footerToggleContainer.classList.add('visible');
+            }, 500);
+        });
+
+        footerToggleBtn.addEventListener('mouseleave', () => {
+            clearTimeout(tooltipTimeout);
+            footerToggleContainer.classList.remove('visible');
+        });
     </script>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2196F3">
@@ -1564,10 +1595,6 @@
 
     <script>
         // Update hover event listeners to show the tooltip container
-        const footerToggleContainer = document.getElementById('footer-toggle-container');
-        const footerToggleBtn = document.getElementById('footer-toggle');
-        let tooltipTimeout;
-
         footerToggleBtn.addEventListener('mouseover', () => {
             clearTimeout(tooltipTimeout);
             tooltipTimeout = setTimeout(() => {

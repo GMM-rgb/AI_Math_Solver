@@ -1,3 +1,5 @@
+// server.js
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -10,7 +12,10 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const app = express();
 const port = process.env.PORT || 3001;
-    
+
+// ** Define the path to the virtual environment's Python executable **
+const pythonExecutable = path.join(__dirname, 'venv', 'Scripts', 'python.exe'); // Adjust if your venv is elsewhere
+
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
@@ -28,10 +33,10 @@ const trainingData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'tr
 function generateResponse(input, type, data) {
     const personalities = trainingData.personalities;
     const friendly = personalities.friendly;
-    
+
     const prefix = friendly.prefixes[Math.floor(Math.random() * friendly.prefixes.length)];
     const suffix = friendly.suffixes[Math.floor(Math.random() * friendly.suffixes.length)];
-    
+
     if (type === 'math') {
         // For math problems, keep the structured JSON format
         return {
@@ -48,10 +53,10 @@ function generateResponse(input, type, data) {
         };
     } else {
         // For conversations, return plain text with emojis
-        const baseResponses = trainingData.conversations.find(c => 
+        const baseResponses = trainingData.conversations.find(c =>
             c.variations.some(v => v.includes(input.toLowerCase()))
         )?.responses || ["I understand, but could you rephrase that?"];
-        
+
         const baseResponse = baseResponses[Math.floor(Math.random() * baseResponses.length)];
         return `${prefix} ${baseResponse} ${suffix}`;
     }
@@ -60,7 +65,7 @@ function generateResponse(input, type, data) {
 // Update findBestMatch function
 function findBestMatch(input) {
     input = input.toLowerCase().trim();
-    
+
     // Check for math patterns first
     const mathPattern = /[\d+\-*/()=x]/;
     if (mathPattern.test(input)) {
@@ -91,8 +96,8 @@ function processMathProblem(input, operator) {
     // Basic math processing logic
     const numbers = input.split(/[+\-*/x=]/).map(n => parseFloat(n.trim()));
     let result;
-    
-    switch(operator) {
+
+    switch (operator) {
         case 'plus':
             result = numbers[0] + numbers[1];
             break;
@@ -138,17 +143,17 @@ app.post('/wiki/define', async (req, res) => {
 app.post('/chat', async (req, res) => {
     const message = req.body.message;
     console.log('Received message:', message);
-    
+
     try {
-        const pythonProcess = spawn('python3', [
+        // ** Use the Python executable from the virtual environment **
+        const pythonProcess = spawn(pythonExecutable, [
             path.join(__dirname, 'src', 'chat_model.py'),
             message
         ], {
             env: {
                 ...process.env,
                 PYTHONIOENCODING: 'utf-8',
-                PYTHONUTF8: '1',
-                PATH: process.env.PATH
+                PYTHONUTF8: '1'
             }
         });
 
@@ -156,13 +161,15 @@ app.post('/chat', async (req, res) => {
         let errorOutput = '';
 
         pythonProcess.stdout.on('data', (data) => {
-            result += data.toString();
-            console.log('Python output:', data.toString());
+            const output = data.toString();
+            result += output;
+            console.log('Python output:', output);
         });
 
         pythonProcess.stderr.on('data', (data) => {
-            errorOutput += data.toString();
-            console.error('Python error:', data.toString());
+            const error = data.toString();
+            errorOutput += error;
+            console.error('Python error:', error);
         });
 
         await new Promise((resolve, reject) => {
@@ -193,8 +200,8 @@ app.post('/generate', (req, res) => {
         res.json({ text: response });
     } catch (error) {
         console.error('Text generation error:', error);
-        res.status(500).json({ 
-            text: "I'm having trouble processing that. Could you rephrase?" 
+        res.status(500).json({
+            text: "I'm having trouble processing that. Could you rephrase?"
         });
     }
 });
@@ -202,7 +209,7 @@ app.post('/generate', (req, res) => {
 // Add feedback endpoint
 app.post('/feedback', async (req, res) => {
     const { positive, solution, equations } = req.body;
-    
+
     if (positive) {
         try {
             // Store feedback in training data
@@ -212,20 +219,20 @@ app.post('/feedback', async (req, res) => {
                 equations,
                 type: 'positive'
             };
-            
+
             // Read current feedback file or create new one
             const feedbackPath = path.join(__dirname, 'data', 'feedback.json');
             let feedbackData = [];
-            
+
             try {
                 feedbackData = JSON.parse(fs.readFileSync(feedbackPath, 'utf8'));
             } catch (e) {
                 // File doesn't exist or is invalid, start fresh
             }
-            
+
             feedbackData.push(feedback);
             fs.writeFileSync(feedbackPath, JSON.stringify(feedbackData, null, 2));
-            
+
             res.json({ success: true });
         } catch (error) {
             console.error('Error saving feedback:', error);
@@ -243,20 +250,29 @@ app.post('/processImage', upload.single('image'), async (req, res) => {
     }
 
     try {
-        const pythonProcess = spawn('python3', [
+        // ** Use the Python executable from the virtual environment **
+        const pythonProcess = spawn(pythonExecutable, [
             path.join(__dirname, 'src', 'screen_capture.py'),
             req.file.path
-        ]);
+        ], {
+            env: {
+                ...process.env,
+                PYTHONIOENCODING: 'utf-8',
+                PYTHONUTF8: '1'
+            }
+        });
 
         let result = '';
         let errorOutput = '';
 
         pythonProcess.stdout.on('data', (data) => {
             result += data.toString();
+            console.log('Python output:', data.toString());
         });
 
         pythonProcess.stderr.on('data', (data) => {
             errorOutput += data.toString();
+            console.error('Python error:', data.toString());
         });
 
         pythonProcess.on('close', (code) => {
@@ -271,7 +287,7 @@ app.post('/processImage', upload.single('image'), async (req, res) => {
                 const parsedResult = JSON.parse(result);
                 // Check if text contains math operators or numbers
                 const hasMath = /[\d+\-*/()=x²³¹⁴⁵⁶⁷⁸⁹⁰]+/.test(parsedResult.text);
-                
+
                 res.json({
                     text: parsedResult.text,
                     isMath: hasMath,

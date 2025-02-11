@@ -1,7 +1,8 @@
 try:
     import wikipedia
-except ImportError:
-    print("Warning: wikipedia module not found. Please install it using: pip install wikipedia")
+    print("wikipedia module imported successfully")
+except ImportError as e:
+    print(f"ImportError: {e}")
     wikipedia = None
 
 import re
@@ -11,13 +12,16 @@ class WikiHelper:
     def __init__(self):
         self.cache: Dict[str, str] = {}
         self.wikipedia_available = wikipedia is not None
+        print(f"Wikipedia available: {self.wikipedia_available}")
         
     def search_term(self, term: str) -> Optional[str]:
         """Search Wikipedia for a term and return a summary"""
         if not self.wikipedia_available:
+            print(f"Cannot search for {term}, wikipedia module not available.")
             return None
             
         if term in self.cache:
+            print(f"Returning cached result for {term}")
             return self.cache[term]
             
         try:
@@ -28,7 +32,8 @@ class WikiHelper:
             cleaned_summary = re.sub(r'\([^)]*\)', '', summary)
             self.cache[term] = cleaned_summary
             return cleaned_summary
-        except:
+        except Exception as e:
+            print(f"Error searching for {term}: {e}")
             return None
 
     def get_definition(self, term: str) -> Optional[str]:
@@ -44,5 +49,11 @@ class WikiHelper:
         """Get related terms for a concept"""
         try:
             return wikipedia.search(term, results=5)
-        except:
+        except Exception as e:
+            print(f"Error getting related terms for {term}: {e}")
             return []
+
+if __name__ == "__main__":
+    helper = WikiHelper()
+    definition = helper.get_definition("Artificial Intelligence")
+    print(definition)

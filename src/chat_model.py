@@ -3,6 +3,10 @@ import sys
 import json
 import codecs
 
+# Debug prints to verify environment and sys.path
+print(f"Python executable used: {sys.executable}")
+print(f"sys.path: {sys.path}")
+
 # Set up UTF-8 encoding for output
 if sys.stdout.encoding != 'utf-8':
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')

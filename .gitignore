@@ -53,3 +53,17 @@ temp/
 
 # Sympy installation folder
 sympy/
+
+# Ignore all directories named 'venv' or starting with 'venv'
+venv*/
+
+# Ignore virtual environment directories
+venv/
+venv3.11.5/
+venv311/
+
+# Ignore virtual environment directories
+venv/
+env/
+ENV/
+.venv/

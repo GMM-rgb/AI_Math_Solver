@@ -258,73 +258,73 @@ app.post('/feedback', async (req, res) => {
   }
 });
 
-// Update the processImage endpoint
-app.post('/processImage', upload.single('image'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('No image uploaded');
-  }
-
-  try {
-    // Use the Python executable from the virtual environment
-    const pythonProcess = spawn(
-      pythonExecutable,
-      [path.join(__dirname, 'src', 'screen_capture.py'), req.file.path],
-      {
-        env: {
-          ...process.env,
-          PYTHONIOENCODING: 'utf-8',
-          PYTHONUTF8: '1',
-        },
-      }
-    );
-
-    let result = '';
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      result += data.toString();
-      console.log('Python output:', data.toString());
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-      console.error('Python error:', data.toString());
-    });
-
-    pythonProcess.on('close', (code) => {
-      // Clean up uploaded file
-      fs.unlinkSync(req.file.path);
-
-      if (code !== 0) {
-        return res.status(500).send(errorOutput);
-      }
-
-      try {
-        const parsedResult = JSON.parse(result);
-        // Check if text contains math operators or numbers
-        const hasMath = /[\d+\-*/()=x²³¹⁴⁵⁶⁷⁸⁹⁰]+/.test(parsedResult.text);
-
-        res.json({
-          text: parsedResult.text,
-          isMath: hasMath,
-          message: hasMath ? 'Math problem: yes' : 'Math problem: no',
-        });
-      } catch (parseError) {
-        res.status(500).send('Error parsing OCR result');
-      }
-    });
-  } catch (error) {
-    // Clean up file if there's an error
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
+   // Update the processImage endpoint
+   app.post('/processImage', upload.single('image'), async (req, res) => {
+    if (!req.file) {
+      return res.status(400).send('No image uploaded');
     }
-    console.error('Image processing error:', error);
-    res.status(500).send('Error processing image');
-  }
-});
 
-// Start server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-  console.log('Press Ctrl+C to quit.');
-});
+    try {
+      // Use the Python executable from the virtual environment
+      const pythonProcess = spawn(
+        pythonExecutable,
+        [path.join(__dirname, 'src', 'screen_capture.py'), req.file.path],
+        {
+          env: {
+            ...process.env,
+            PYTHONIOENCODING: 'utf-8',
+            PYTHONUTF8: '1',
+          },
+        }
+      );
+
+      let result = '';
+      let errorOutput = '';
+
+      pythonProcess.stdout.on('data', (data) => {
+        result += data.toString();
+        console.log('Python output:', data.toString());
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+        console.error('Python error:', data.toString());
+      });
+
+      pythonProcess.on('close', (code) => {
+        // Clean up uploaded file
+        fs.unlinkSync(req.file.path);
+
+        if (code !== 0) {
+          return res.status(500).send(errorOutput);
+        }
+
+        try {
+          const parsedResult = JSON.parse(result);
+          // Check if text contains math operators or numbers
+          const hasMath = /[\d+\-*/()=x²³¹⁴⁵⁶⁷⁸⁹⁰]+/.test(parsedResult.text);
+
+          res.json({
+            text: parsedResult.text,
+            isMath: hasMath,
+            message: hasMath ? 'Math problem: yes' : 'Math problem: no',
+          });
+        } catch (parseError) {
+          res.status(500).send('Error parsing OCR result');
+        }
+      });
+    } catch (error) {
+      // Clean up file if there's an error
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      console.error('Image processing error:', error);
+      res.status(500).send('Error processing image');
+    }
+  });
+
+  // Start server
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+    console.log('Press Ctrl+C to quit.');
+  });

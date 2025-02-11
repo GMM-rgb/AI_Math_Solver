@@ -7,10 +7,28 @@
             "variations": ["what is 2 plus 2", "2 plus 2", "sum of 2 and 2"]
         },
         {
+            "input": "2.1 + 2.3",
+            "answer": 4.4,
+            "steps": ["Added 2 and 2, then add the decimals 0.1 and 0.3 which eqauls 0.4 then add the 4 from 2 plus 2 then you get 2.4"],
+            "variations": ["what is 2.1 plus 2.3", "2.1 plus 2.3", "sum of 2.1 and 2.3"]
+        },
+        {
             "input": "5 - 3",
             "answer": 2,
             "steps": ["Subtracted 3 from 5"],
             "variations": ["what is 5 minus 3", "5 minus 3", "difference of 5 and 3"]
+        },
+        {
+            "input": "1/2",
+            "answer": 0.5,
+            "steps": ["Divide the numerator (left) by the denominator (right)"],
+            "variations": ["what is 1 over 2", "1 over 2", "1 on the top of 2"]
+        },
+        {
+            "input": "1/4",
+            "answer": 0.25,
+            "steps": ["Divide the numerator (left) by the denominator (right)"],
+            "variations": ["what is 1 over 4", "1 over 4", "1 on the top of 4"]
         },
         {
             "input": "4 * 6",

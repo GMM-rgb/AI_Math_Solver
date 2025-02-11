@@ -44,6 +44,34 @@
             ]
         },
         {
+            "input": "y = 2x + 3, find y when x = 4",
+            "answer": "y = 11",
+            "steps": [
+                "Substitute x with 4: y = 2(4) + 3",
+                "Multiply: y = 8 + 3",
+                "Add: y = 11"
+            ],
+            "variations": [
+                "Compute y if x equals 4 in y = 2x + 3",
+                "What is y when x is 4 in the equation y = 2x + 3",
+                "Find y given x = 4 for y = 2x + 3"
+            ]
+        },
+        {
+            "input": "y = -3x + 9, find x when y = 0",
+            "answer": "x = 3",
+            "steps": [
+                "Set y to 0: 0 = -3x + 9",
+                "Subtract 9 from both sides: -9 = -3x",
+                "Divide both sides by -3: x = 3"
+            ],
+            "variations": [
+                "Find x when y is zero in y = -3x + 9",
+                "Calculate x if y equals 0 for y = -3x + 9",
+                "What is x when y = 0 in the equation y = -3x + 9"
+            ]
+        },                
+        {
             "input": "-3 + 2",
             "answer": -1,
             "steps": ["Add -3 and 2"],

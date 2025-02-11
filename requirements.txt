@@ -7,3 +7,4 @@ scikit-learn>=1.0.0
 pipdeptree>=2.0.0
 wheel>=0.37.0
 setuptools>=59.5.0
+wikipedia-api>=0.5.4

@@ -14,7 +14,7 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // ** Define the path to the virtual environment's Python executable **
-const pythonExecutable = path.join(__dirname, 'venv', 'Scripts', 'python.exe'); // Adjust if your venv is elsewhere
+const pythonExecutable = path.join(__dirname, 'venv311', 'Scripts', 'python.exe');
 
 // Middleware
 app.use(express.json());

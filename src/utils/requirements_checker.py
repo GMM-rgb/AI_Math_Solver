@@ -6,6 +6,7 @@ def check_requirements():
     try:
         import sympy
         import numpy
+        import json
         return True
     except ImportError as e:
         print(f"Warning: Missing basic requirement - {str(e)}")

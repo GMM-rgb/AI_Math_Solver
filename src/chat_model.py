@@ -4,8 +4,8 @@ import json
 import codecs
 
 # Debug prints to verify environment and sys.path
-print(f"Python executable used: {sys.executable}")
-print(f"sys.path: {sys.path}")
+sys.stderr.write(f"Python executable used: {sys.executable}\n")
+sys.stderr.write(f"sys.path: {sys.path}\n")
 
 # Set up UTF-8 encoding for output
 if sys.stdout.encoding != 'utf-8':
@@ -35,11 +35,11 @@ try:
     from src.learning.self_learner import SelfLearner
     from src.models.tf_model import MathTFModel  # Update this line
 except ImportError as e:
-    print(json.dumps({
+    sys.stderr.write(json.dumps({
         "error": f"Import error: {str(e)}",
         "format": "json",
         "confidence": 0
-    }))
+    }) + '\n')
     sys.exit(1)
 
 MATH_SYMBOLS = {

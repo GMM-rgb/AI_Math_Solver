@@ -1,6 +1,6 @@
 try:
     import wikipedia
-    print("wikipedia module imported successfully")
+    # print("wikipedia module imported successfully")
 except ImportError as e:
     print(f"ImportError: {e}")
     wikipedia = None
@@ -12,7 +12,7 @@ class WikiHelper:
     def __init__(self):
         self.cache: Dict[str, str] = {}
         self.wikipedia_available = wikipedia is not None
-        print(f"Wikipedia available: {self.wikipedia_available}")
+        # print(f"Wikipedia available: {self.wikipedia_available}")
         
     def search_term(self, term: str) -> Optional[str]:
         """Search Wikipedia for a term and return a summary"""

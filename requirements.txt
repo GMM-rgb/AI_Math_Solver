@@ -5,3 +5,5 @@ pillow>=9.0.0
 pytesseract>=0.3.8
 scikit-learn>=1.0.0
 pipdeptree>=2.0.0
+wheel>=0.37.0
+setuptools>=59.5.0

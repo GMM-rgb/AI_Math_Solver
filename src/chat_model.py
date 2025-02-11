@@ -90,18 +90,29 @@ def normalize_characters(text):
         text = text.replace(special, standard)
     return text
 
+# chat_model.py
+import sys
+import os
+import json
+import re
+from sympy import symbols, Eq, solve, simplify, sympify, nsimplify
+from fractions import Fraction
+
+# Define MATH_SYMBOLS within the script
+MATH_SYMBOLS = {
+    'x': ['x', '𝑥', '𝓍', '𝔵', 'χ'],
+    'y': ['y', '𝑦', '𝓎', '𝔶', 'γ'],
+    'z': ['z', '𝑧', '𝓏', '𝔷', 'ζ'],
+    '+': ['+', '＋', '➕', '∑'],
+    '-': ['-', '−', '－', '➖'],
+    '*': ['*', '×', '⋅', '∗', '⨯'],
+    '/': ['/', '÷', '∕', '⁄'],
+    '=': ['=', '＝', '≡', '≈', '≋'],
+    '^': ['^', '⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
+}
+
 class SimpleMathModel:
     def __init__(self):
-        self.initialized = True
-        # Define safe math operations
-        self.safe_operators = {
-            '+': lambda x, y: x + y,
-            '-': lambda x, y: x - y,
-            '*': lambda x, y: x * y,
-            '/': lambda x, y: x / y,
-            '^': lambda x, y: x ** y
-        }
-        from sympy import symbols
         self.x, self.y, self.z = symbols('x y z')
         self.symbol_map = self._create_symbol_map()
 
@@ -133,174 +144,362 @@ class SimpleMathModel:
 
     def _identify_problem_type(self, problem):
         """Identify the type of math problem"""
-        if '+' in problem: return "Addition"
-        if '-' in problem: return "Subtraction"
-        if '*' in problem: return "Multiplication"
-        if '/' in problem: return "Division"
-        if '^' in problem: return "Exponent"
-        if 'x' in problem or '=' in problem: return "Algebraic"
+        problem = problem.lower()
+        if any(phrase in problem for phrase in ['equation of a line', 'find equation', 'write equation', 'line with slope']):
+            if any(keyword in problem for keyword in ['slope', 'passing through', 'point']):
+                return "LinearEquation"
+        if 'solve' in problem or 'x' in problem or '=' in problem:
+            return "Algebraic"
+        if '+' in problem or ' plus ' in problem: return "Addition"
+        if '-' in problem or ' minus ' in problem: return "Subtraction"
+        if '*' in problem or ' times ' in problem or ' multiplied by ' in problem: return "Multiplication"
+        if '/' in problem or ' divided by ' in problem: return "Division"
+        if '^' in problem or ' to the power of ' in problem: return "Exponent"
         return "Unknown"
 
-    def _safe_eval(self, problem):
-        """Safely evaluate math expression without using eval()"""
-        # Normalize the expression first
-        problem = self._normalize_expression(problem)
-        # Clean and tokenize the expression
-        problem = problem.replace(' ', '')
-        problem = problem.replace('^', '**')
-        
-        # Handle basic arithmetic
-        for op in ['+-', '*/', '**']:
-            tokens = re.split(f'([{op}])', problem)
-            if len(tokens) > 1:
-                tokens = [t for t in tokens if t.strip()]
-                try:
-                    nums = [float(tokens[0])]
-                    for i in range(1, len(tokens), 2):
-                        op = tokens[i]
-                        num = float(tokens[i + 1])
-                        if op == '+': nums.append(num)
-                        elif op == '-': nums.append(-num)
-                        elif op == '*': nums[-1] *= num
-                        elif op == '/': nums[-1] /= num
-                        elif op == '**': nums[-1] **= num
-                    return sum(nums)
-                except (ValueError, IndexError):
-                    raise ValueError("Invalid math expression")
-        
-        # If no operators found, try to parse as a single number
-        try:
-            return float(problem)
-        except ValueError:
-            raise ValueError("Invalid math expression")
+    def _translate_words_to_symbols(self, problem):
+        """Translate worded mathematical operations to symbols."""
+        translations = {
+            'plus': '+',
+            'minus': '-',
+            'times': '*',
+            'multiplied by': '*',
+            'divide': '/',
+            'divided by': '/',
+            'over': '/',
+            'to the power of': '^',
+        }
+        for word, symbol in translations.items():
+            problem = problem.replace(word, symbol)
+        return problem
 
-    def _format_fraction(self, result):
-        """Format result as a fraction if needed"""
-        if isinstance(result, (int, float)):
-            try:
-                fraction = Fraction(str(float(result))).limit_denominator()
-                if fraction.denominator != 1:
-                    return {
-                        "decimal": float(result),
-                        "fraction": f"{fraction.numerator}/{fraction.denominator}",
-                        "display": f"<sup>{fraction.numerator}</sup>⁄<sub>{fraction.denominator}</sub>"
-                    }
-            except (ValueError, ZeroDivisionError):
-                pass
-        return {"decimal": result}
-
-    def solve_system_of_equations(self, equations):
-        """Solve a system of linear equations"""
+    def handle_arithmetic(self, problem):
+        """Handle basic arithmetic calculations."""
+        steps = []
         try:
-            from sympy import symbols, solve, simplify
-            from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
-            
-            x, y = symbols('x y')
-            transformations = standard_transformations + (implicit_multiplication_application,)
-            
-            system = []
-            for eq in equations:
-                eq = normalize_characters(clean_equation(eq))  # Add normalization here
-                if '=' in eq:
-                    left, right = eq.split('=')
-                    # Convert to standard form: ax + by + c = 0
-                    expr = parse_expr(left, transformations=transformations) - parse_expr(right, transformations=transformations)
-                    system.append(expr)
-            
-            # Solve the system
-            solution = solve(system, [x, y])
-            
-            # Clean and format solution
-            if isinstance(solution, dict):
-                return ", ".join(f"{var} = {simplify(val)}" for var, val in solution.items())
-            elif isinstance(solution, list):
-                if len(solution) == 0:
-                    return "No solution"
-                elif len(solution) == 1:
-                    return f"x = {solution[0][0]}, y = {solution[0][1]}"
-                else:
-                    solutions = []
-                    for sol in solution:
-                        x_val = simplify(sol[0])
-                        y_val = simplify(sol[1])
-                        solutions.append(f"x = {x_val}, y = {y_val}")
-                    return " or ".join(solutions)
-            
-            return str(simplify(solution))
-            
+            # Use sympy's sympify to evaluate the expression safely
+            problem = self._translate_words_to_symbols(problem)
+            result = sympify(problem)
+            simplified_result = nsimplify(result)
+
+            steps.append(f"1. Interpreted the expression: {problem}")
+            steps.append(f"2. Calculated the result: {simplified_result}")
+
+            return {
+                "answer": f"{simplified_result}",
+                "type": "Arithmetic",
+                "confidence": 100,
+                "steps": steps
+            }
         except Exception as e:
-            return f"Could not solve system: {str(e)}"
+            return {
+                "answer": f"Could not evaluate the expression: {e}",
+                "type": "Error",
+                "confidence": 0,
+                "steps": []
+            }
+
+    def handle_linear_equation(self, problem):
+        """Handle linear equation problems like finding the equation of a line given slope and point."""
+        problem = problem.lower()
+
+        # Extract slope using regex
+        slope_match = re.search(r'slope\s*(?:of)?\s*(?:=|is)?\s*([-+]?\d*\.?\d+)', problem)
+        if slope_match:
+            m = float(slope_match.group(1))
+        else:
+            return {
+                "answer": "Could not find the slope in the problem.",
+                "type": "Error",
+                "confidence": 0,
+                "steps": []
+            }
+
+        # Extract point using regex
+        point_match = re.search(r'passing through\s*\(?\s*([-+]?\d*\.?\d+)\s*,\s*([-+]?\d*\.?\d+)\s*\)?', problem)
+        if point_match:
+            x0 = float(point_match.group(1))
+            y0 = float(point_match.group(2))
+        else:
+            return {
+                "answer": "Could not find the point in the problem.",
+                "type": "Error",
+                "confidence": 0,
+                "steps": []
+            }
+
+        # Calculate b using b = y0 - m * x0
+        b = y0 - m * x0
+        b = round(b, 4)
+        m = round(m, 4)
+
+        # Create the equation string
+        if b >= 0:
+            equation = f"y = {m}x + {b}"
+        else:
+            equation = f"y = {m}x - {abs(b)}"
+
+        # Prepare steps
+        steps = [
+            "Using the point-slope form of a line:",
+            f"1. Start with y - y₀ = m(x - x₀)",
+            f"2. Plug in the slope (m = {m}) and the point (x₀ = {x0}, y₀ = {y0}):",
+            f"   y - ({y0}) = {m}(x - ({x0}))",
+            "3. Simplify the equation:",
+            f"   y - {y0} = {m}x - {m * x0}",
+            f"4. Rearranged equation:",
+            f"   y = {m}x - {m * x0} + {y0}",
+            f"5. Simplify constants:",
+            f"   y = {equation.split('=')[1]}"
+        ]
+
+        return {
+            "answer": equation,
+            "type": "LinearEquation",
+            "confidence": 100,
+            "steps": steps
+        }
+
+    def solve_algebraic_equation(self, problem):
+        """Solve algebraic equations of one variable."""
+        try:
+            # Extract left and right sides of the equation
+            if '=' in problem:
+                lhs_str, rhs_str = map(str.strip, problem.split('='))
+            else:
+                lhs_str = problem.strip()
+                rhs_str = '0'
+            lhs = sympify(lhs_str)
+            rhs = sympify(rhs_str)
+            equation = Eq(lhs, rhs)
+            solutions = solve(equation)
+
+            steps = [
+                f"1. Original equation: {lhs_str} = {rhs_str}",
+                f"2. Solving for x..."
+            ]
+
+            solutions_str = ', '.join([f"x = {sol}" for sol in solutions])
+
+            return {
+                "answer": solutions_str,
+                "type": "Algebraic",
+                "confidence": 100,
+                "steps": steps
+            }
+        except Exception as e:
+            return {
+                "answer": f"Could not solve the equation: {e}",
+                "type": "Error",
+                "confidence": 0,
+                "steps": []
+            }
 
     def solve(self, problem):
-        # Normalize the problem first
+        """Solve the given math problem."""
         problem = self._normalize_expression(problem)
-        # Handle system of equations first
-        if '\n' in problem or ',' in problem:
-            equations = [eq.strip() for eq in problem.replace(',', '\n').split('\n') if eq.strip()]
-            if len(equations) > 1:
-                solution = self.solve_system_of_equations(equations)
-                return {
-                    "answer": solution,
-                    "type": "System of Equations",
-                    "confidence": 100,
-                    "steps": [
-                        f"1. Original system:",
-                        *[f"   {eq}" for eq in equations],
-                        "2. Solving simultaneously...",
-                        f"3. Solution: {solution}"
-                    ]
-                }
+        problem = self._translate_words_to_symbols(problem)
+        problem_type = self._identify_problem_type(problem)
 
-        try:
-            # Handle algebraic equations first
-            if 'x' in problem or '=' in problem:
-                eq_parts = problem.split('=')
-                if len(eq_parts) == 2:
-                    # Import transformations for implicit multiplication
-                    from sympy.parsing.sympy_parser import standard_transformations, implicit_multiplication_application
-                    transformations = standard_transformations + (implicit_multiplication_application,)
-                    # Use transformations to handle cases like "2x" -> "2*x"
-                    lhs = parse_expr(eq_parts[0].strip(), transformations=transformations)
-                    rhs = parse_expr(eq_parts[1].strip(), transformations=transformations)
-                    equation = lhs - rhs
-                    solution = solve(equation, 'x')
-                    return {
-                        "answer": f"x = {solution[0]}",
-                        "type": "Algebraic",
-                        "confidence": 100,
-                        "steps": [
-                            f"1. Original equation: {problem}",
-                            f"2. Rearranged to: {equation} = 0",
-                            f"3. Solved for x: x = {solution[0]}"
-                        ]
-                    }
+        if problem_type == "LinearEquation":
+            return self.handle_linear_equation(problem)
+        elif problem_type == "Algebraic":
+            return self.solve_algebraic_equation(problem)
+        elif problem_type in ["Addition", "Subtraction", "Multiplication", "Division", "Exponent"]:
+            return self.handle_arithmetic(problem)
+        else:
+            return {
+                "answer": "error",
+                "type": "Unknown",
+                "confidence": 0,
+                "steps": []
+            }
 
-            # Clean the input
-            clean_problem = problem.strip()
-            
-            # Calculate using safe evaluation
-            result = self._safe_eval(clean_problem)
-            problem_type = self._identify_problem_type(clean_problem)
-            
-            # Format the result
-            formatted = self._format_fraction(result)
-            
+class ChatBot:
+    def __init__(self):
+        self.math_model = SimpleMathModel()
+        # Load training data
+        data_file_path = os.path.join(os.path.dirname(__file__), '../data/training_data.json')
+        with open(data_file_path, 'r', encoding='utf-8') as f:
+            self.training_data = json.load(f)
+
+    def _normalize_text(self, text):
+        """Normalize text by making it lowercase and removing extra spaces."""
+        text = text.lower()
+        text = re.sub(r'\s+', ' ', text)
+        return text.strip()
+
+    def find_in_training_data(self, problem):
+        """Find a matching problem in the training data using regex patterns."""
+        problem_normalized = self._normalize_text(problem)
+        for item in self.training_data['math_problems']:
+            for variation in item['variations']:
+                pattern = re.compile(variation)
+                if pattern.fullmatch(problem_normalized):
+                    # Extract numbers from the user's problem
+                    numbers = list(map(float, re.findall(r'\d+', problem)))
+                    # Perform the calculation
+                    if '+' in problem:
+                        result = numbers[0] + numbers[1]
+                    elif '-' in problem:
+                        result = numbers[0] - numbers[1]
+                    elif '*' in problem or 'times' in problem:
+                        result = numbers[0] * numbers[1]
+                    elif '/' in problem or 'divided by' in problem:
+                        result = numbers[0] / numbers[1]
+                    else:
+                        result = item['answer']  # Use the answer from training data if operator not found
+
+                    # Prepare the answer and steps
+                    answer = str(result)
+                    steps = [step.replace('a', str(numbers[0])).replace('b', str(numbers[1])) for step in item['steps']]
+                    item_copy = item.copy()
+                    item_copy['answer'] = answer
+                    item_copy['steps'] = steps
+                    return item_copy
+        return None
+
+    def handle_math_problem(self, problem):
+        """Handle math problem using training data or the SimpleMathModel."""
+        # Try to find the problem in training data
+        training_item = self.find_in_training_data(problem)
+        if training_item:
             return {
-                "answer": formatted.get("decimal"),
-                "fraction": formatted.get("fraction"),
-                "display": formatted.get("display"),
-                "confidence": 100,
-                "steps": [
-                    f"1. Read {problem_type} problem: {clean_problem}",
-                    f"2. Calculate result: {formatted.get('display', formatted['decimal'])}"
-                ],
-                "type": problem_type
+                'answer': training_item['answer'],
+                'type': 'FromTrainingData',
+                'confidence': 100,
+                'steps': training_item['steps']
             }
-        except Exception as e:
-            return {
-                "error": str(e),
-                "confidence": 0
-            }
+
+        # If not found, use the math model
+        result = self.math_model.solve(problem)
+        return result
+
+    def generate_response(self, message):
+        """Generate response based on the user's message."""
+        result = self.handle_math_problem(message)
+        if result['confidence'] > 0:
+            #response = f"Answer: {result['answer']}\nSteps:\n" + "\n".join(result['steps'])
+        response  = f"""
+<div style="background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 10px 0;">
+    <div class="math-text" style="font-size: 18px; color: #333;">Problem: {math_problem}</div>
+    <div class="divider" style="margin: 10px 0;"></div>
+    <div class="fade-in" style="color: #2196F3; font-size: 20px;">
+        Answer: {result['answer'] if 'answer' in result else result.get('decimal')}
+    </div>
+    {f'<div class="fade-in" style="color: #666; margin-top: 5px;">Fraction: {result["fraction"]}</div>' if 'fraction' in result else ''}
+    <div class="fade-in" style="margin-top: 10px; color: #666;">
+        <div>Steps:</div>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+            {''.join(f'<li class="step-item" style="--index: {i+1}">{step}</li>' for i, step in enumerate(result["steps"]))}
+        </ul>
+    </div>
+    <div class="feedback">
+        <button onclick="handleFeedback(true)" class="feedback-btn positive">
+            <span class="emoji">👍</span> Helpful
+        </button>
+    </div>
+</div>"""
+
+                    # Update the styles section with better animations
+                    return f"""
+<style>
+    @keyframes revealText {{
+        from {{ color: rgba(51, 51, 51, 0.5); }}
+        to {{ color: rgba(51, 51, 51, 1); }}
+    }}
+    @keyframes smoothFade {{
+        from {{ opacity: 0.7; transform: translateY(-5px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
+    .math-text {{
+        color: #333;
+        animation: revealText 0.5s ease-out;
+        white-space: pre-wrap;
+    }}
+    .divider {{
+        height: 1px;
+        background: #ddd;
+        margin: 10px 0;
+    }}
+    .fade-in {{
+        opacity: 1;
+        animation: smoothFade 0.5s ease-out;
+    }}
+    .step-item {{
+        opacity: 1;
+        animation: smoothFade 0.4s ease-out;
+        animation-delay: calc(var(--index) * 0.1s);
+        padding: 5px;
+        border-radius: 4px;
+        color: #555;
+    }}
+    .step-item:hover {{
+        background-color: rgba(33, 150, 243, 0.05);
+    }}
+    .feedback {{
+        margin-top: 15px;
+        text-align: right;
+    }}
+    .feedback-btn {{
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }}
+    .feedback-btn:hover {{
+        background: #f0f0f0;
+    }}
+    .feedback-btn.positive {{
+        color: #4CAF50;
+    }}
+    .feedback-btn .emoji {{
+        font-size: 1.2em;
+    }}
+</style>
+<script>
+function handleFeedback(isPositive) {{
+    if (isPositive) {{
+        const btn = event.target.closest('.feedback-btn');
+        btn.style.background = '#4CAF50';
+        btn.style.color = '#fff';
+        btn.innerHTML = '<span class="emoji">✨</span> Thanks!';
+        btn.disabled = true;
+        
+        // Send feedback to server
+        fetch('/feedback', {{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ 
+                positive: true,
+                solution: "{result['answer'] if 'answer' in result else result.get('decimal')}",
+                equations: "{math_problem}"
+            }})
+        }});
+    }}
+}}
+</script>
+{math_solution}"""
+        else:
+            response = ""
+        return response
+
+# Main execution
+if __name__ == "__main__":
+    # Get user input from command-line arguments
+    if len(sys.argv) > 1:
+        user_input = sys.argv[1]
+    else:
+        user_input = input("Enter a math problem: ")
+
+    chatbot = ChatBot()
+    response = chatbot.generate_response(user_input)
+    print(response)
 
 class ChatBot:
     def __init__(self):

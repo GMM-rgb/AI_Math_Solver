@@ -41,7 +41,7 @@ except ImportError as e:
         "confidence": 0
     }) + '\n')
     sys.exit(1)
-
+    
 MATH_SYMBOLS = {
     'x': ['x', '𝑥', '𝓍', '𝔵', 'χ'],
     'y': ['y', '𝑦', '𝓎', '𝔶', 'γ'],

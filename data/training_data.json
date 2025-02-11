@@ -550,6 +550,17 @@
                 "need help", "can you help", "help me", "i need help",
                 "can you assist", "can you explain", "can you guide me"
             ]
+        },
+        {
+            "input": "😂",
+            "responses": [
+                "I don't get it, what's so funny?",
+                "As a machine I don't understand humor very well but okay, ha ha. 😂"
+            ],
+            "variations": [
+                "lol", "ha ha", "ha", "funny", "that was funny", "lmao", "lmfao",
+                "😅"
+            ]
         }
 
     ]

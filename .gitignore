@@ -41,7 +41,7 @@ npm-debug.log*
 pids/
 *.pid
 *.seed
-*.pid.lock
+#*.pid.lock
 
 # Testing
 coverage/

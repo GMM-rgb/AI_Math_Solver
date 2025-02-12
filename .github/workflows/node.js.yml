@@ -27,14 +27,31 @@ jobs:
         cache: 'npm'
 
     # Install Node.js dependencies
-    - run: npm ci -f
+    - run: npm ci
     - run: npm run build --if-present
     - run: npm test
     - run: npm start
 
-    # Force add package-lock.json
-    - name: Force add package-lock.json
-      run: git add -f package-lock.json
+    # Temporarily disable .gitignore for package-lock.json
+    - name: Disable .gitignore for package-lock.json
+      run: |
+        echo '!.gitignore_temp' >> .gitignore
+        echo 'package-lock.json' >> .gitignore_temp
+        mv .gitignore_temp .gitignore
+
+    # Generate and add package-lock.json
+    - name: Generate and add package-lock.json
+      run: |
+        npm i --package-lock-only
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git add package-lock.json
+        git commit -m "Add package-lock.json" || echo "No changes to commit"
+
+    # Re-enable .gitignore for package-lock.json
+    - name: Re-enable .gitignore for package-lock.json
+      run: |
+        sed -i '/package-lock.json/d' .gitignore
 
     # Set up Python
     - name: Set up Python ${{ matrix.python-version }}

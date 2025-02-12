@@ -33,24 +33,14 @@ jobs:
     - run: npm test
     - run: npm start
 
-    # Temporarily disable .gitignore for package-lock.json
-    - name: Disable .gitignore for package-lock.json
-      run: |
-        mv .gitignore .gitignore.bak
-        echo "!package-lock.json" > .gitignore
-
-    # Generate and add package-lock.json
-    - name: Generate and add package-lock.json
+    # Generate package-lock.json and force add it
+    - name: Generate package-lock.json and commit
       run: |
         npm i --package-lock-only
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
-        git add package-lock.json
+        git add -f package-lock.json
         git commit -m "Add package-lock.json" || echo "No changes to commit"
-
-    # Restore .gitignore
-    - name: Restore .gitignore
-      run: mv .gitignore.bak .gitignore
 
     # Set up Python
     - name: Set up Python ${{ matrix.python-version }}

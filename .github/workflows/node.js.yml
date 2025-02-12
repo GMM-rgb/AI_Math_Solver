@@ -27,7 +27,7 @@ jobs:
         cache: 'npm'
 
     # Install Node.js dependencies
-    - run: npm ci
+    - run: npm ci -f
     - run: npm run build --if-present
     - run: npm test
     - run: npm start

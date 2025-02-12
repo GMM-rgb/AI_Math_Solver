@@ -25,19 +25,23 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    
+
     # Install Node.js dependencies
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
     - run: npm start
-    
+
+    # Force add package-lock.json
+    - name: Force add package-lock.json
+      run: git add -f package-lock.json
+
     # Set up Python
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     # Install Python dependencies
     - name: Install Python dependencies
       run: |

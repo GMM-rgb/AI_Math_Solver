@@ -35,7 +35,10 @@ jobs:
     - run: npm install --save-dev cross-env
     - run: npm run build --if-present
     - run: npm test
-    - run: npm start
+
+    # Run the Node.js server in the background
+    - name: Start Node.js server in the background
+      run: nohup npm start &
 
     # Temporarily disable .gitignore for package-lock.json
     - name: Disable .gitignore for package-lock.json

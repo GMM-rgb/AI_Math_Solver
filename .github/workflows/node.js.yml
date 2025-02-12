@@ -1,31 +1,71 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Node.js CI
+name: Node.js and Python CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main-5" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main-5" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
+        python-version: [3.8, 3.9, 3.10]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
+        
     steps:
     - uses: actions/checkout@v4
+
+    # Set up Node.js
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+
+    # Install Node.js dependencies
     - run: npm ci
+    - run: npm audit fix --force
     - run: npm run build --if-present
     - run: npm test
+    - run: npm start
+
+    # Temporarily update .gitignore to allow package-lock.json
+    - name: Temporarily update .gitignore
+      run: |
+        echo "!.gitignore_temp" >> .gitignore
+        echo "!package-lock.json" >> .gitignore_temp
+        mv .gitignore_temp .gitignore
+
+    # Generate and force-add package-lock.json
+    - name: Generate and force-add package-lock.json
+      run: |
+        npm i --package-lock-only
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git add -f package-lock.json
+        git commit -m "Add package-lock.json" || echo "No changes to commit"
+
+    # Restore .gitignore
+    - name: Restore .gitignore
+      run: |
+        mv .gitignore.bak .gitignore
+
+    # Set up Python
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    # Install Python dependencies
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        

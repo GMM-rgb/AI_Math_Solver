@@ -58,6 +58,13 @@ jobs:
     - name: Restore .gitignore
       run: mv .gitignore.bak .gitignore
 
+    # Publish to GitHub Pages
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GH_PAT }}
+        publish_dir: ./dist
+
     # Set up Python
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4

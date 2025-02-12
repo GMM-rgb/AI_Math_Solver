@@ -20,7 +20,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install
+          npm install -f
           # Generate package-lock.json
           npm i --package-lock-only
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

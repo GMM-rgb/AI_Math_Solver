@@ -35,9 +35,8 @@ jobs:
     # Temporarily disable .gitignore for package-lock.json
     - name: Disable .gitignore for package-lock.json
       run: |
-        echo '!.gitignore_temp' >> .gitignore
-        echo 'package-lock.json' >> .gitignore_temp
-        mv .gitignore_temp .gitignore
+        mv .gitignore .gitignore.bak
+        echo "!package-lock.json" > .gitignore
 
     # Generate and add package-lock.json
     - name: Generate and add package-lock.json
@@ -48,10 +47,9 @@ jobs:
         git add package-lock.json
         git commit -m "Add package-lock.json" || echo "No changes to commit"
 
-    # Re-enable .gitignore for package-lock.json
-    - name: Re-enable .gitignore for package-lock.json
-      run: |
-        sed -i '/package-lock.json/d' .gitignore
+    # Restore .gitignore
+    - name: Restore .gitignore
+      run: mv .gitignore.bak .gitignore
 
     # Set up Python
     - name: Set up Python ${{ matrix.python-version }}

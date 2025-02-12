@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-package-lock.json
+#package-lock.json
 
 # TensorFlow
 *.dylib
@@ -41,7 +41,7 @@ npm-debug.log*
 pids/
 *.pid
 *.seed
-#*.pid.lock
+*.pid.lock
 
 # Testing
 coverage/

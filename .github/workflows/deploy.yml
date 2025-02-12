@@ -50,6 +50,18 @@ jobs:
         run: |
           mkdir -p dist
           cp -r public/* dist/
+
+      # Check if dist directory exists
+      - name: Check if dist directory exists
+        run: |
+          if [ ! -d "./dist" ]; then
+            echo "dist directory does not exist"
+            exit 1
+          fi
+
+      # List contents of dist directory
+      - name: List contents of dist directory
+        run: ls -la ./dist
           
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

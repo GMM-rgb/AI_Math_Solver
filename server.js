@@ -12,7 +12,7 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const os = require('os'); // Added to detect the operating system
 const app = express();
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3003;
 
 // Detect the operating system
 const isWindows = os.platform() === 'win32';

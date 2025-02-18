@@ -150,6 +150,23 @@
             ]
         },
         {
+            "input": "Solve the system of equations x + y = 8 and x - y = 4",
+            "answer": "x = 6, y = 2",
+            "steps": [
+                "Add the two equations: (x + y) + (x - y) = 8 + 4",
+                "This simplifies to: 2x = 12",
+                "Divide both sides by 2: x = 6",
+                "Substitute x = 6 into the first equation: 6 + y = 8",
+                "Subtract 6 from both sides: y = 2"
+            ],
+            "variations": [
+                "Solve for x and y in the system x + y = 8 and x - y = 4",
+                "Determine the values of x and y given x + y = 8 and x - y = 4",
+                "Find the solution to the equations x + y = 8 and x - y = 4",
+                "x + y = 8, x - y = 4"
+            ]
+        },        
+        {
             "input": "Find the equation of the line perpendicular to y = -\\( \\frac{1}{2} \\)x + 5 passing through (2, 3)",
             "answer": "y = 2x - 1",
             "steps": [
